@@ -1,0 +1,1 @@
+/home/ysh/inabot_ws/install/robot_upstart:/home/ysh/inabot_ws/install/inabot_teleop:/home/ysh/inabot_ws/install/inabot_joy:/home/ysh/inabot_ws/install/inabot_description:/home/ysh/inabot_ws/install/inabot_mqtt_python_bridge:/home/ysh/inabot_ws/install/inabot_mqtt_bridge:/home/ysh/inabot_ws/install/inabot_core:/opt/ros/humble

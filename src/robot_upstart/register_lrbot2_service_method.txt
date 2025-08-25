@@ -1,0 +1,111 @@
+
+[lrbot2 서비스 등록 절차]
+
+colcon build --symlink-install
+source /opt/ros/humble/setup.bash
+source /home/hs/lrbot2_ws/install/setup.bash
+ros2 run robot_upstart install robot_bringup/launch/bringup.launch.py
+
+=== 빌드 생성물 ==
+found_path: /home/yoon/robot_ws/install/lrbot2_bring_up/share/lrbot2_bring_up/launch/lrbot2_bring_up.launch.py
+candidate : /home/yoon/robot_ws/install/lrbot2_bring_up/share/lrbot2_bring_up/launch/lrbot2_bring_up.launch.py
+b'/usr/lib/systemd/systemd'
+Preparing to install files to the following paths:
+  /etc/ros/humble/lrbot2.d/.installed_files
+  /etc/ros/humble/lrbot2.d/lrbot2_bring_up.launch.py
+  /etc/systemd/user/multi-user.target.wants/lrbot2.service
+  /lib/systemd/user/lrbot2.service
+  /usr/sbin/lrbot2-start
+  /usr/sbin/lrbot2-stop
+Now calling: /usr/bin/sudo /home/yoon/robot_ws/install/robot_upstart/share/robot_upstart/scripts/mutate_files
+[sudo] password for yoon: 
+Filesystem operation succeeded.
+** To complete installation please run the following command:
+ sudo systemctl daemon-reload && sudo systemctl start lrbot2
+=======================================
+
+-> user 영역으로 이동 : sudo 사용하지 않으려고
+
+
+1. 서비스 파일 위치 변경
+
+ mkdir -p ~/.config/systemd/user
+ cp /lib/systemd/user/lrbot2.service ~/.config/systemd/user/
+ 
+2. 실행 파일 위치 변경
+ mkdir -p ~/bin
+    cp /usr/sbin/lrbot2-start ~/bin/
+    cp /usr/sbin/lrbot2-stop ~/bin/
+    chmod +x ~/bin/lrbot2-start ~/bin/lrbot2-stop
+    
+3. 서비스 파일 내용 수정
+  vi  ~/.config/systemd/user/lrbot2.service
+  - 여기는 생성되는 PC에 맞게 바이너리 위치 변경
+  
+yoon@yoon-ThinkPad-X1-Carbon-Gen-12:~$ cat  ~/.config/systemd/user/lrbot2.service
+# THIS IS A GENERATED FILE, NOT RECOMMENDED TO EDIT.
+
+[Unit]
+Description="Bringup lrbot2 service"
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c '. /opt/ros/humble/setup.bash && exec /home/hs/bin/lrbot2-start'
+#ExecStart=/bin/bash -c '. /opt/ros/humble/setup.bash && exec /home/yoon/bin/lrbot2-start'
+KillMode=mixed
+#TimeoutStopSec=5s
+#TimeoutStartSec=0
+#RestartSec=3s
+
+[Install]
+WantedBy=multi-user.target
+
+4.  데몬 리로드 및 서비스 실행
+사용자 서비스 리로드
+systemctl --user daemon-reload
+
+사용자 서비스 시작
+systemctl --user start lrbot2.service
+
+서비스 상태 확인
+systemctl --user status lrbot2.service
+
+재부팅 후에도 자동 실행되도록 linger 활성화
+loginctl enable-linger yoon
+
+ 
+systemctl --user enable lrbot2.service
+ -=>
+ yoon@yoon-ThinkPad-X1-Carbon-Gen-12:~$ loginctl enable-linger yoon
+yoon@yoon-ThinkPad-X1-Carbon-Gen-12:~$ systemctl --user enable lrbot2.service
+Created symlink /home/yoon/.config/systemd/user/default.target.wants/lrbot2.service → /home/yoon/.config/systemd/user/lrbot2.service.
+yoon@yoon-ThinkPad-X1-Carbon-Gen-12:~$ 
+
+
+===
+
+systemctl --user daemon-reload  # 설정 반영
+systemctl --user restart lrbot2.service  # 서비스 재시작
+systemctl --user status lrbot2.service  # 상태 확인
+systemctl --user stop lrbot2.service  # 서비스 종료
+systemctl --user start lrbot2.service # 시작
+
+-[-
+[Unit]
+Description=chameleon_navi service
+DefaultDependencies=no
+Before=shutdown.target
+After=bringup.service
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sleep 2
+ExecStart=/home/hs/chameleon2_ws/chameleon_navi.bash
+TimeoutStartSec=0
+RestartSec=3s
+
+[Install]
+WantedBy=default.target 
+==
+

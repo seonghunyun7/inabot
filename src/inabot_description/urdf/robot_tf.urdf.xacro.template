@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="inabot">
+	<link name="robot_name_base_footprint"/>
+	<link name="robot_name_base_link"/>
+	<joint name="robot_name_base_link_fixed_joint" type="fixed">
+        <parent link="robot_name_base_footprint"/>
+        <child link="robot_name_base_link"/>
+        <origin xyz="0 0 0.08" rpy="0 0 0"/>
+	</joint>
+	<xacro:macro name="insert_lidar" params="prefix init_x init_y init_roll init_pitch init_yaw">
+         <link name="${prefix}_lidar"/>
+
+         <joint name="${prefix}_lidar_fixed_joint" type="fixed">
+             <parent link="robot_name_base_link"/>
+			 <child link="${prefix}_lidar"/>
+		     <!--origin xyz="${dir*0.380990} ${-dir*0.230424} 0.2" rpy="0 0 ${(-dir*90+45)*pi/180}"/-->
+			 <origin xyz="${init_x} ${init_y} 0.2" rpy="${init_roll*pi/180} ${init_pitch*pi/180} ${init_yaw*pi/180}"/>
+         </joint>
+	 </xacro:macro>
+	 <xacro:insert_lidar prefix="robot_name_front" init_x="initial_front_lidar_tf_x" init_y="initial_front_lidar_tf_y" init_roll="initial_front_lidar_roll" init_pitch="initial_front_lidar_pitch" init_yaw="initial_front_lidar_yaw"/>
+     <xacro:insert_lidar prefix="robot_name_rear" init_x="initial_rear_lidar_tf_x" init_y="initial_rear_lidar_tf_y" init_roll="initial_rear_lidar_roll" init_pitch="initial_rear_lidar_pitch" init_yaw="initial_rear_lidar_yaw"/>
+
+	<xacro:macro name="insert_depth" params="prefix dir init_x init_y">
+        <link name="${prefix}_depth"/>
+
+        <joint name="${prefix}_depth_fixed_joint" type="fixed">
+            <parent link="robot_name_base_link"/>
+            <child link="${prefix}_depth"/>
+            <origin xyz="${dir*init_x} ${dir*init_y} 0.2" rpy="0 0 ${(-dir*90+90)*pi/180}"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:insert_depth prefix="robot_name_front" dir="1" init_x="initial_front_depth_tf_x" init_y="initial_front_depth_tf_y"/>
+	<xacro:insert_depth prefix="robot_name_rear" dir="-1" init_x="initial_front_depth_tf_x" init_y="initial_front_depth_tf_y"/>
+	
+	<xacro:macro name="insert_image" params="prefix">
+        <link name="${prefix}_depth_image"/>
+
+        <joint name="${prefix}_depth_image_fixed_joint" type="fixed">
+            <parent link="${prefix}_depth"/>
+            <child link="${prefix}_depth_image"/>
+            <origin xyz="0 0 0" rpy="${-90*pi/180} 0 ${-90*pi/180}"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:insert_image prefix="robot_name_front"/>
+    <xacro:insert_image prefix="robot_name_rear"/>
+</robot>
