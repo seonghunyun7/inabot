@@ -1,8 +1,0 @@
-setup.py
-inabot_msgs/__init__.py
-inabot_msgs.egg-info/PKG-INFO
-inabot_msgs.egg-info/SOURCES.txt
-inabot_msgs.egg-info/dependency_links.txt
-inabot_msgs.egg-info/top_level.txt
-inabot_msgs/msg/__init__.py
-inabot_msgs/msg/_obstacle_status.py
