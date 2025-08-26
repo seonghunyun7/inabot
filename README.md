@@ -1,34 +1,3 @@
-Inabot Project Structure
-
-이 저장소는 ROS2 기반 로봇 플랫폼 Inabot의 전체 소스 코드입니다.
-각 폴더/패키지의 역할은 다음과 같습니다.
-
-주요 패키지
-
-src/inabot_core/
-로봇 핵심 기능 모듈.
-
-센서 (IMU, Odom)
-
-모터 드라이버 및 제어기
-
-주행 제어 알고리즘 (MPC, Pure Pursuit 등)
-
-경로 계획 (A*, Global Planner 등)
-
-상태 모니터링
-
-src/inabot_description/
-로봇 모델 정의.
-
-URDF/Xacro
-
-Mesh(시각/충돌 모델)
-
-RViz 설정, Gazebo world
-
-src/inabot_interface/
-시스템 전체 인터페이스 다이어그램 등 문서 자료.
 # Inabot Project Structure
 
 이 저장소는 ROS2 기반 로봇 플랫폼 **Inabot**의 전체 소스 코드입니다.  
@@ -87,11 +56,7 @@ SLAM 관련 패키지
 ### `setup/`
 ROS2 환경 설치 및 의존성 스크립트
 
----
+--- 
 
-## 빌드 및 실행
-
-### 1. 의존성 설치
-```bash
-rosdep install --from-paths src --ignore-src -r -y
+ 
 
