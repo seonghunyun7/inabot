@@ -145,21 +145,29 @@ void GlobalPlanner::fmsPathCallback(const nav_msgs::msg::Path::SharedPtr msg)
   if (fms_path_msg_.poses.empty()) {
     RCLCPP_WARN(this->get_logger(), "Warning: Received empty FMS path!");
   } else {
+    #if 0
     // 시작과 끝 좌표 출력
     auto& start_pose = fms_path_msg_.poses.front().pose.position;
     auto& goal_pose = fms_path_msg_.poses.back().pose.position;
     RCLCPP_INFO(this->get_logger(), "FMS Path start: (%.3f, %.3f), goal: (%.3f, %.3f)", 
                 start_pose.x, start_pose.y, goal_pose.x, goal_pose.y);
+    #endif
+    // 모든 포인트 출력
+    for (size_t i = 0; i < fms_path_msg_.poses.size(); ++i) {
+      auto& pos = fms_path_msg_.poses[i].pose.position;
+      RCLCPP_INFO(this->get_logger(), "Point %zu: (%.3f, %.3f, %.3f)", i, pos.x, pos.y, pos.z);
+    }
   }
 
-  //A star 알고리즘 일단 회피 경로 일단 조건으로 일단 라이더 장애물 인지로 간단히 가감속 중지로
+  // A* 알고리즘 조건에 따라 경로 발행
   if (!enable_a_start_) {
     tryPublishPath();
   } else {
     tryPublishBestPath();
   }
-
+#if _path_save
   saveFmsPathToFile();
+#endif
 }
 
 void GlobalPlanner::tryPublishBestPath()

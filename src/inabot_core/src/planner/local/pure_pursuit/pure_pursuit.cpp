@@ -7,6 +7,8 @@
 #define __stop_obstacle__ false
 #define __LOG_2_ false
 
+#define SINGLE_POINT_MODE 0  // 1: 단일 포인트 처리, 0: 다중 포인트 처리
+
 pure_pursuit::pure_pursuit(const rclcpp::NodeOptions& options)
   : Node("pure_pursuit", options), 
   current_index_(0)
@@ -129,11 +131,16 @@ void pure_pursuit::path_callback(const nav_msgs::msg::Path::SharedPtr msg) {
       return;
     }
 
-    #if __LOG__
-    RCLCPP_INFO(this->get_logger(), "Received new goal point: (%.2f, %.2f)",
-                        msg->poses.front().pose.position.x, msg->poses.front().pose.position.y);
-    #endif
+#if 1 //__LOG__
+    // 전체 경로 포인트 개수 출력
+    RCLCPP_INFO(this->get_logger(), "Received path with %zu points", msg->poses.size());
 
+    // 모든 포인트 좌표 출력
+    for (size_t i = 0; i < msg->poses.size(); ++i) {
+        const auto& pos = msg->poses[i].pose.position;
+        RCLCPP_INFO(this->get_logger(), "Point %zu: (%.3f, %.3f, %.3f)", i, pos.x, pos.y, pos.z);
+    }
+#endif
     path_provider_->updatePath(*msg);
 }  
   
@@ -158,6 +165,7 @@ double pure_pursuit::quaternion_to_euler(const geometry_msgs::msg::Quaternion& q
     return yaw; // Return yaw as theta
 }
 
+#if 0 //SINGLE_POINT_MODE
 void pure_pursuit::updateControl() {
   // 경로가 비어있으면 제어 업데이트 건너뜀
   if (path_provider_->size() == 0) {
@@ -234,6 +242,89 @@ void pure_pursuit::updateControl() {
     path_provider_->clearPath();
     current_index_ = 0;
   }
+}
+#endif
+
+//단일 및 다중 경로 포인트도 모두 다 된다.
+void pure_pursuit::updateControl() {
+    // 경로가 비어있으면 제어 건너뜀
+    if (path_provider_->size() == 0) {
+        return;
+    }
+
+    // current_index_ 유효 범위 체크
+    if (current_index_ >= static_cast<int>(path_provider_->size())) {
+        RCLCPP_WARN(this->get_logger(), "Current index %d out of range (path size: %zu), clearing path.", 
+                    current_index_, path_provider_->size());
+        path_provider_->clearPath();
+        current_index_ = 0;
+        return;
+    }
+
+    // 현재 목표 포인트 가져오기
+    auto target_pose = path_provider_->getPose(current_index_);
+
+#if __LOG_2_
+    RCLCPP_INFO(this->get_logger(), "Current pose: (%.2f, %.2f)", current_pose_.position.x, current_pose_.position.y);
+    RCLCPP_INFO(this->get_logger(), "Target index: %d, Target point: (%.2f, %.2f)",
+                current_index_, target_pose.pose.position.x, target_pose.pose.position.y);
+#endif
+
+    // 제어 명령 계산
+    auto cmd_vel = purePursuitControl(current_index_);
+
+    // 장애물 감속 처리
+    if (obstacle_stop_ && obstacle_distance_ < max_stop_distance_) {
+        double decel_ratio = (obstacle_distance_ - min_safe_distance_) / (max_stop_distance_ - min_safe_distance_);
+        decel_ratio = std::clamp(decel_ratio, 0.0, 1.0);
+
+        double original_linear = cmd_vel.linear.x;
+        cmd_vel.linear.x *= decel_ratio;
+
+        RCLCPP_INFO(this->get_logger(),
+                    "[Obstacle] distance: %.2f m, decel_ratio: %.2f, linear.x: %.2f -> %.2f, angular.z: %.2f",
+                    obstacle_distance_, decel_ratio, original_linear, cmd_vel.linear.x, cmd_vel.angular.z);
+
+        if (decel_ratio == 0.0) {
+            cmd_vel.angular.z = 0.0;
+            publishCmd(cmd_vel);
+            RCLCPP_WARN(this->get_logger(), "Obstacle too close: %.2f m -> STOP", obstacle_distance_);
+            return;
+        }
+    }
+
+    publishCmd(cmd_vel);
+
+#if __VISUAL_DEBUG__
+    visualizePathAndRobot(current_index_);
+#endif
+
+    // 마지막 포인트 도달 여부만 체크
+    if (current_index_ == static_cast<int>(path_provider_->size()) - 1) {
+        auto last_pose = path_provider_->getPose(current_index_);
+        double dx = last_pose.pose.position.x - current_pose_.position.x;
+        double dy = last_pose.pose.position.y - current_pose_.position.y;
+        double distance_to_goal = std::hypot(dx, dy);
+#if 1 //__LOG_2_
+        RCLCPP_INFO(this->get_logger(), "Distance to final goal: %.3f m, Threshold: %.3f m", distance_to_goal, goal_threshold_);
+#endif
+        if (distance_to_goal <= goal_threshold_) {
+            RCLCPP_INFO(this->get_logger(), "Final goal reached! Clearing path.");
+            publishGoalReached(true);
+            path_provider_->clearPath();
+            current_index_ = 0;
+        }
+    } else {
+        // 중간 포인트는 도달 시 인덱스 증가만
+        double dx = target_pose.pose.position.x - current_pose_.position.x;
+        double dy = target_pose.pose.position.y - current_pose_.position.y;
+        double distance_to_point = std::hypot(dx, dy);
+
+        if (distance_to_point <= goal_threshold_) {
+            RCLCPP_INFO(this->get_logger(), "Reached intermediate point %d", current_index_);
+            current_index_++;
+        }
+    }
 }
 
 int pure_pursuit::searchTargetIndex() {

@@ -1,62 +1,44 @@
-<p style="display: inline">
-  <!-- Programming Language -->
-  <img src="https://img.shields.io/badge/-C++-00599C.svg?logo=c%2B%2B&style=for-the-badge">
-  <!-- ROS 2 -->
-  <img src="https://img.shields.io/badge/-ROS%202-22314E.svg?logo=ros&style=for-the-badge&logoColor=white">
-  <!-- Geometry Messages -->
-  <img src="https://img.shields.io/badge/-Geometry%20Messages-7F7F7F.svg?logo=ros&style=for-the-badge&logoColor=white">
-  <!-- Navigation Messages -->
-  <img src="https://img.shields.io/badge/-Navigation%20Messages-7F7F7F.svg?logo=ros&style=for-the-badge&logoColor=white">
-  <!-- TF2 -->
-  <img src="https://img.shields.io/badge/-TF2-7F7F7F.svg?logo=ros&style=for-the-badge&logoColor=white">
-</p>
+Pure Pursuit 알고리즘 개요
 
-## Functional Overview
-This software implements a ROS 2 node for path following control of robots or autonomous vehicles using the Pure Pursuit algorithm. It calculates and outputs velocity and angular velocity commands to efficiently navigate the robot along a specified path.
+Pure Pursuit 알고리즘은 경로를 따라 주행할 때 **목표점(goal point)**을 기준으로 차량의 조향을 제어하는 방식입니다. 기본 흐름은 다음과 같습니다:
 
-![Peek 2024-03-30 23-45](https://github.com/Arcanain/pure_pursuit_planner/assets/52307432/19483a1f-92bd-49bc-9e26-91188e22c41b)
+차량의 현재 위치 결정
 
-## Requirements
-### System Requirements
-- OS : Ubuntu 22.04  
-- ROS2 : Humble
+HMMWV나 NavLab과 같은 차량에는 중앙 차량 제어기가 있어 (x, y, heading) 형태로 현재 위치를 제공합니다.
 
-### System Dependencies
-- [path_smoother](https://github.com/Arcanain/path_smoother) 
-- [arcanain_simulator](https://github.com/Arcanain/arcanain_simulator) 
+위치는 초기 위치를 기준으로 보고되며, 초기 위치가 글로벌 좌표계의 기준점이 됩니다.
 
-## How To Use
-### Execution Steps
-```bash
-cd ~/ros2_ws
-source ~/ros2_ws/install/setup.bash
-ros2 launch pure_pursuit_planner path_planner.launch.py
+차량과 가장 가까운 경로점 찾기
 
-### Input
+기하학적 계산에서 목표점은 차량에서 lookahead 거리 내에 있어야 합니다.
 
-| Variable Name      | Type            | Description                         |
-|-------------------------|-------------------|---------------------------------------|
-| `odom`                  | `nav_msgs::msg::Odometry` | Odometry information of the robot |
-| `tgt_path`              | `nav_msgs::msg::Path` | Target trajectory of the robot |
+lookahead 거리 내에 여러 경로점이 있을 수 있으므로, 차량에서 가장 가까운 경로점을 먼저 찾습니다.
 
-### Output
+이후 차량 위치에서 lookahead 거리만큼 떨어진 점을 찾기 위해, 가까운 경로점부터 경로를 따라 탐색을 시작합니다.
 
-| Variable Name      | Type            | Description                         |
-|-------------------------|-------------------|---------------------------------------|
-| `cmd_vel`               | `geometry_msgs::msg::Twist` | Velocity and angular velocity commands for the robot |
+목표점(goal point) 찾기
 
-### Internal Values
+목표점은 경로를 따라 이동하면서 차량과의 거리가 lookahead 거리가 되는 점입니다.
 
-| Variable Name      | Type            | Description                         |
-|-------------------------|-------------------|---------------------------------------|
-| `x`, `y`, `yaw`         | `double`          | Current position and orientation of the robot |
-| `v`, `w`                | `double`          | Velocity and angular velocity of the robot |
-| `cx`, `cy`,`cyaw`, `ck` | `std::vector<double>` | List of x and y coordinates of the path |
-| `target_ind`            | `int`             | Current target index |
-| `target_vel`            | `double`          | Target velocity |
-| `goal_threshold`        | `double`          | Threshold for goal judgment |
-| `k`, `Lfc`, `Kp`, `dt`  | `double`          | Pure Pursuit parameters |
-| `oldNearestPointIndex`  | `int`             | Index of the nearest point in the previous iteration |
-| `current_vel`           | `double`          | Current velocity of the robot |
-| `minCurvature`,`maxCurvature`         | `double`          | Minimum and maximum curvature values |
-| `minVelocity`,`maxVelocity`           | `double`          | Minimum and maximum velocity values |
+경로점 좌표는 글로벌 좌표계에서 기록되어 있으므로, 거리 계산도 글로벌 좌표계에서 수행합니다.
+
+목표점 좌표를 차량 좌표계로 변환
+
+목표점을 찾은 후, 이를 차량 좌표계로 변환합니다.
+
+이유: 곡률(curvature) 계산은 차량 좌표계에서 수행되며, 차량 제어기에 보내는 조향 명령도 차량 좌표계 기준이어야 합니다.
+
+곡률(curvature) 계산
+
+이전 단계에서 도출한 곡률 방정식을 이용해 차량이 따라야 할 곡률을 계산합니다.
+
+이 곡률을 차량 제어기가 이해할 수 있는 스티어링 휠 각도로 변환합니다.
+
+차량 위치 업데이트
+
+시뮬레이션 중에는 명령이 차량의 위치와 방향(heading)에 어떤 영향을 주는지 확인해야 합니다.
+
+즉, 차량의 상태를 업데이트하면서 다음 단계 계산에 활용합니다.
+
+💡 정리:
+Pure Pursuit는 “차량 위치 → 가까운 경로점 → lookahead 거리 목표점 → 차량 좌표 변환 → 곡률 계산 → 조향 명령 → 차량 위치 업데이트”의 순서로 동작합니다.

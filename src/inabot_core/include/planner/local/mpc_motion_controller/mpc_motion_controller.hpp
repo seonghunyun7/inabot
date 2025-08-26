@@ -37,6 +37,9 @@
 #include <memory>
 #include <string>
 
+#include <deque>
+#include <mutex>
+
 #include "inabot_msgs/msg/obstacle_status.hpp"
 
 #include "planner/common/path_provider.hpp"
@@ -136,6 +139,12 @@ private:
     // 감속/정지 관련 파라미터
     double min_safe_distance_ = 0.2;   // 최소 안전 거리(m)
     double max_stop_distance_ = 1.0;   // 감속 시작 거리(m)
+
+    std::deque<geometry_msgs::msg::PoseStamped> interpolated_path_queue_;
+    
+    std::vector<nav_msgs::msg::Path> interpolated_segments_;
+
+    std::mutex path_mutex_;
 };
 
 #endif  // MPC_MOTION_CONTROLLER_HPP_

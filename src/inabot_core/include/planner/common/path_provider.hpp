@@ -34,9 +34,20 @@ public:
       int min_points = 4             // 기본 최소 4개 점
   );
 
-  // 여러 점으로 구성된 경로에 대해 스플라인 보간 경로 생성
-  nav_msgs::msg::Path generateSplinePathFromMultiplePoints(
-      const std::vector<geometry_msgs::msg::PoseStamped>& input_poses);
+  /**
+   * @brief FMS 등에서 받은 다수의 경로 포인트를 받아 스플라인 보간 경로 생성
+   * @param input_poses FMS에서 받은 전체 포즈 벡터
+   * @param current_pose 차량 현재 위치
+   * @param interp_spacing 보간 간격 (m)
+   * @param min_points 최소 점 개수 (MPC용)
+   * @return 보간된 nav_msgs::msg::Path
+   */
+    nav_msgs::msg::Path generateSplinePathFromMultiplePoints(
+        const std::vector<geometry_msgs::msg::PoseStamped>& input_poses,
+        const geometry_msgs::msg::Pose& current_pose,
+        double interp_spacing = 0.4,
+        int min_points = 4
+    );
 
   // 현재 위치와 목표 위치 간 도착 여부 판단
   bool isWithinGoalThreshold(

@@ -59,7 +59,14 @@ const std::vector<geometry_msgs::msg::PoseStamped> & PathProvider::getPath() con
   return path_points_;
 }
 
-// 단일 목표 지점에 대해 현재 위치 기반 보간 경로 생성
+/**
+ * @brief FMS 등에서 받은 단일 경로 포인트를 받아 스플라인 보간 경로 생성
+ * @param input_poses FMS에서 받은 전체 포즈 벡터
+ * @param current_pose 차량 현재 위치
+ * @param interp_spacing 보간 간격 (m)
+ * @param min_points 최소 점 개수 (MPC용)
+ * @return 보간된 nav_msgs::msg::Path
+ */
 // 단일 목표 지점에 대해 현재 위치 기반 보간 경로 생성
 nav_msgs::msg::Path PathProvider::generateInterpolatedPathForSinglePoint(
     const geometry_msgs::msg::PoseStamped& goal_pose,
@@ -114,60 +121,79 @@ nav_msgs::msg::Path PathProvider::generateInterpolatedPathForSinglePoint(
   return path;
 }
 
-// 여러 점으로 구성된 경로에 대해 스플라인 보간 경로 생성
+/**
+ * @brief FMS 등에서 받은 다수의 경로 포인트를 받아 스플라인 보간 경로 생성
+ * @param input_poses FMS에서 받은 전체 포즈 벡터
+ * @param current_pose 차량 현재 위치
+ * @param interp_spacing 보간 간격 (m)
+ * @param min_points 최소 점 개수 (MPC용)
+ * @return 보간된 nav_msgs::msg::Path
+ */
 nav_msgs::msg::Path PathProvider::generateSplinePathFromMultiplePoints(
-    const std::vector<geometry_msgs::msg::PoseStamped>& input_poses)
+    const std::vector<geometry_msgs::msg::PoseStamped>& input_poses,
+    const geometry_msgs::msg::Pose& current_pose, // 로봇 현재 위치 추가
+    double interp_spacing,  // 보간 간격 (예: 0.4m)
+    int min_points          // 최소 점 개수 (예: 4)
+)
 {
-  nav_msgs::msg::Path interpolated_path;
-  if (input_poses.empty()) return interpolated_path;
+    nav_msgs::msg::Path path;
 
-  interpolated_path.header = input_poses.front().header;
-
-  size_t n = input_poses.size();
-  if (n < 2) {
-    if (n == 1) {
-      interpolated_path.poses.push_back(input_poses[0]);
-    }
-    return interpolated_path;
-  }
-
-  int interp_points_between = std::max(1, static_cast<int>(std::ceil(3.0 / (n - 1))));
-
-  for (size_t i = 0; i < n - 1; ++i) {
-    const auto& p1 = input_poses[i].pose;
-    const auto& p2 = input_poses[i + 1].pose;
-
-    // 구간 시작점은 처음 한 번만 추가 (첫 구간일 때)
-    if (i == 0) {
-      interpolated_path.poses.push_back(input_poses[0]);
+    if (input_poses.empty()) {
+        RCLCPP_WARN(logger_, "[PathProvider] Input poses empty, returning empty path.");
+        return path;
     }
 
-    for (int j = 1; j <= interp_points_between; ++j) {
-      float t = static_cast<float>(j) / (interp_points_between + 1);
+    geometry_msgs::msg::Pose last_pose = current_pose; // 현재 로봇 위치 기준
 
-      geometry_msgs::msg::PoseStamped interp_pose;
-      interp_pose.header = input_poses[i].header;
+    for (const auto& goal_pose : input_poses) {
+        double dx = goal_pose.pose.position.x - last_pose.position.x;
+        double dy = goal_pose.pose.position.y - last_pose.position.y;
+        double dist = std::hypot(dx, dy);
 
-      // 위치 선형 보간
-      interp_pose.pose.position.x = (1 - t) * p1.position.x + t * p2.position.x;
-      interp_pose.pose.position.y = (1 - t) * p1.position.y + t * p2.position.y;
-      interp_pose.pose.position.z = 0.0;
+        if (dist < 0.01) {
+            path.poses.push_back(goal_pose);
+            last_pose = goal_pose.pose;
+            continue;
+        }
 
-      // orientation slerp 보간
-      tf2::Quaternion q1, q2, q_interp;
-      tf2::fromMsg(p1.orientation, q1);
-      tf2::fromMsg(p2.orientation, q2);
-      q_interp = q1.slerp(q2, t);
-      interp_pose.pose.orientation = tf2::toMsg(q_interp);
+        int interp_count = std::max(min_points - 1, static_cast<int>(std::floor(dist / interp_spacing)));
 
-      interpolated_path.poses.push_back(interp_pose);
+        tf2::Quaternion q_start, q_goal, q_interp;
+        tf2::fromMsg(last_pose.orientation, q_start);
+        tf2::fromMsg(goal_pose.pose.orientation, q_goal);
+
+        for (int i = 0; i <= interp_count; ++i) {
+            double t = static_cast<double>(i) / interp_count;
+
+            geometry_msgs::msg::PoseStamped pose_stamped;
+            pose_stamped.header = goal_pose.header;
+
+            // 위치 선형 보간
+            pose_stamped.pose.position.x = (1 - t) * last_pose.position.x + t * goal_pose.pose.position.x;
+            pose_stamped.pose.position.y = (1 - t) * last_pose.position.y + t * goal_pose.pose.position.y;
+            pose_stamped.pose.position.z = 0.0;
+
+            // 방향 구면 선형 보간 (Slerp)
+            q_interp = q_start.slerp(q_goal, t);
+            pose_stamped.pose.orientation = tf2::toMsg(q_interp);
+
+            path.poses.push_back(pose_stamped);
+
+            RCLCPP_INFO(logger_, "[PathProvider] Interp Point: x=%.3f, y=%.3f, z=%.3f",
+                        pose_stamped.pose.position.x,
+                        pose_stamped.pose.position.y,
+                        pose_stamped.pose.position.z);
+        }
+
+        last_pose = goal_pose.pose;
     }
-  }
 
-  // 마지막 포인트 추가
-  interpolated_path.poses.push_back(input_poses.back());
+    if (!input_poses.empty()) {
+        path.header = input_poses.back().header;
+    }
 
-  return interpolated_path;
+    RCLCPP_INFO(logger_, "[PathProvider] Generated spline path with %zu points.", path.poses.size());
+    return path;
 }
 
 // 현재 위치와 목표 위치 간 도착 여부 판단

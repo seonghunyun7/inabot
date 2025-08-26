@@ -174,48 +174,51 @@ bool MpcMotionController::isOdomValid() const
              ori.z == 0.0 && ori.w == 0.0);
 }
 
+// ============================================================
+// 1Path Callback
+// ============================================================
 void MpcMotionController::pathCallback(const nav_msgs::msg::Path::SharedPtr msg)
 {
-    size_t path_size = msg->poses.size();
-    RCLCPP_INFO(this->get_logger(), "[Path] Received new path with %zu points", path_size);
-
-    if (path_size == 0) {
-        //RCLCPP_WARN(this->get_logger(), "[Path] Empty path received. Ignoring.");
-        return;
-    } else if (path_size != 1) {
-        //RCLCPP_WARN(this->get_logger(), "[Path] Unexpected path size (%zu), expected exactly 1 target point. Ignoring.", path_size);
+    if (!isOdomValid()) {
+        RCLCPP_WARN(this->get_logger(), "[Odom Check] Invalid odometry data.");
         return;
     }
 
-    if (!isOdomValid()) {
-      RCLCPP_WARN(this->get_logger(), "[Odom Check] Invalid odometry data. Make sure odometry is being published.");
-      return;
+    if (msg->poses.empty()) {
+        RCLCPP_WARN(this->get_logger(), "Received empty path.");
+        return;
     }
 
     const auto& current_pose = current_odom_.pose.pose;
-  
-    if (path_provider_->isWithinGoalThreshold(msg->poses.front().pose, current_pose, goal_threshold_)) {
+
+    // 목표 도착 체크 (한 점일 경우와 n개 경로 공통)
+    if (path_provider_->isWithinGoalThreshold(msg->poses.back().pose, current_pose, goal_threshold_)) {
         publishGoalReached(true);
         path_provider_->clearPath();
         return;
     }
 
-    // 경로 보간 처리 및 global_plan_ 일단 1개 온다는 것으로 설계
-    global_plan_ = path_provider_->generateInterpolatedPathForSinglePoint(
+    // 단일 목표 점일 경우
+    if (msg->poses.size() == 1) {
+      global_plan_ = path_provider_->generateInterpolatedPathForSinglePoint(
         msg->poses.front(),
         current_pose,
         interp_spacing_,
         min_points_
-    );
+      );
+    }
+    else 
+    {
+      // 여러 점일 경우 (FMS 전체 경로)
+      global_plan_ = path_provider_->generateSplinePathFromMultiplePoints(
+        msg->poses,         // FMS에서 받은 모든 포인트
+        current_pose,       // 현재 위치
+        interp_spacing_,    // 보간 간격 (예: 0.4m)
+        min_points_         // 최소 점 개수 (예: 4)
+      );
+    }
 
-    //if (path_size == 1) {
-    //    global_plan_ = path_provider_->generateInterpolatedPathForSinglePoint(msg->poses.front(), current_pose);
-    //} else if (path_size < 4) {
-    //    global_plan_ = path_provider_->generateSplinePathFromMultiplePoints(msg->poses);
-    //} else {
-    //    global_plan_ = *msg;
-    //}
- 
+    // PathProvider 내부에 업데이트
     path_provider_->updatePath(global_plan_);
 
 #if __LOG__
@@ -223,48 +226,46 @@ void MpcMotionController::pathCallback(const nav_msgs::msg::Path::SharedPtr msg)
 #endif
 }
 
-void MpcMotionController::timerCallback() {
-    // 1. 현재 상태(로봇 위치, 자세, 속도 등) 추출
-    // 2. MPC solver에 경로와 상태 넘겨 최적 제어 입력 계산
-    // 3. 계산된 제어 입력(cmd_vel) 퍼블리시
-    // 경로가 비어있는지 PathProvider로 체크
-    if (path_provider_->size() == 0) {
-      // RCLCPP_WARN(this->get_logger(), "No planned path received.");
-      return;
+// ============================================================
+// Timer Callback
+// ============================================================
+void MpcMotionController::timerCallback()
+{
+    if (!isOdomValid()) {
+        RCLCPP_WARN(this->get_logger(), "No odometry received.");
+        return;
     }
 
-    if (current_odom_.header.stamp.sec == 0) {
-      RCLCPP_WARN(this->get_logger(), "No odometry received.");
-      return;
+    if (path_provider_->size() < 1) {
+        RCLCPP_WARN(this->get_logger(), "No planned path available.");
+        return;
     }
 
+    // MPC를 이용해 현재 경로 기준 최적 제어 입력 계산
     auto cmd_vel = computeVelocityCommands();
 
-    // 장애물 거리 기반 감속
-    if (obstacle_stop_) {
-        if (obstacle_distance_ < max_stop_distance_) {
-            double decel_ratio = (obstacle_distance_ - min_safe_distance_) /
-                                 (max_stop_distance_ - min_safe_distance_);
-            decel_ratio = std::clamp(decel_ratio, 0.0, 1.0);
+    // 장애물 거리 기반 감속 처리
+    if (obstacle_stop_ && obstacle_distance_ < max_stop_distance_) {
+        double decel_ratio = (obstacle_distance_ - min_safe_distance_) /
+                             (max_stop_distance_ - min_safe_distance_);
+        decel_ratio = std::clamp(decel_ratio, 0.0, 1.0);
 
-            double original_linear = cmd_vel.twist.linear.x;
-            cmd_vel.twist.linear.x *= decel_ratio;
+        double original_linear = cmd_vel.twist.linear.x;
+        cmd_vel.twist.linear.x *= decel_ratio;
 
-            RCLCPP_INFO(this->get_logger(),
-                "[Obstacle] distance: %.2f m, decel_ratio: %.2f, linear.x: %.2f -> %.2f, angular.z: %.2f",
-                obstacle_distance_, decel_ratio, original_linear, cmd_vel.twist.linear.x, cmd_vel.twist.angular.z);
+        if (decel_ratio == 0.0) cmd_vel.twist.angular.z = 0.0;
 
-            if (decel_ratio == 0.0) {
-                cmd_vel.twist.angular.z = 0.0; // 완전 정지 시 회전도 멈춤
-                RCLCPP_WARN(this->get_logger(), "Obstacle too close: %.2f m -> STOP", obstacle_distance_);
-            }
-        }
+        RCLCPP_INFO(this->get_logger(),
+            "[Obstacle] distance: %.2f m, decel_ratio: %.2f, linear: %.2f -> %.2f, angular: %.2f",
+            obstacle_distance_, decel_ratio, original_linear, cmd_vel.twist.linear.x, cmd_vel.twist.angular.z);
     }
 
     cmd_vel_pub_->publish(cmd_vel.twist);
 }
 
-//
+// ============================================================
+// Compute Velocity Commands (MPC)
+// ============================================================
 geometry_msgs::msg::TwistStamped MpcMotionController::computeVelocityCommands()
 {
     geometry_msgs::msg::TwistStamped cmd_vel;
@@ -272,67 +273,45 @@ geometry_msgs::msg::TwistStamped MpcMotionController::computeVelocityCommands()
     const double w = w_;               // steering -> w
     const double throttle = throttle_; // accel: >0; brake: <0
 
-    // 장애물 정지 시
-    #if 0
-    if (obstacle_stop_) {
-      double decel = 0.5; // m/s², 감속률
-      speed_ = std::max(0.0, speed_ - decel * dt_); // dt_는 MPC 주기
-      w_ = 0.0; // 회전도 0
-      cmd_vel.twist.linear.x = speed_;
-      cmd_vel.twist.angular.z = w_;
-
-      RCLCPP_INFO(this->get_logger(),
-                "[Obstacle Stop] decel: %.2f, speed: %.3f, angular: %.3f",
-                decel, speed_, w_);
-
-      return cmd_vel;
-    }
-    #endif
+    // 경로 확인
+    const auto& path = path_provider_->getPath();
 
     // 0. 경로 유무 체크
-    if (path_provider_->size() == 0) {
+    if (path.size() == 0) {
         cmd_vel.twist.linear.x = 0.0;
         cmd_vel.twist.angular.z = 0.0;
         return cmd_vel;
     }
 
-    // 1. 현재 위치, 자세 획득
-    const auto& pose = current_odom_.pose.pose;
-    const double cur_x = pose.position.x;
-    const double cur_y = pose.position.y;
+    if (path.size() < 4) { // MPC 최소 점 수 4개
+        RCLCPP_WARN(get_logger(), "Not enough path points for MPC.");
+        cmd_vel.twist.linear.x = 0.0;
+        cmd_vel.twist.angular.z = 0.0;
+        return cmd_vel;
+    }
 
-    tf2::Quaternion q(
-        pose.orientation.x,
-        pose.orientation.y,
-        pose.orientation.z,
-        pose.orientation.w);
+    // 현재 위치와 자세
+    const auto& pose = current_odom_.pose.pose;
+    double cur_x = pose.position.x;
+    double cur_y = pose.position.y;
+
+    tf2::Quaternion q(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
     double roll, pitch, yaw;
     tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
 
-#if __MPC_LOG__
-    RCLCPP_DEBUG(get_logger(), "[MPC] Current pose - x: %.3f, y: %.3f, yaw: %.3f", cur_x, cur_y, yaw);
-#endif
-
-    // 2. Global path를 차량 좌표계로 변환
+    // 경로를 차량 좌표계로 변환
     std::vector<double> ptsx, ptsy;
-    const auto& path = path_provider_->getPath();  // 내부 경로 참조 얻기
-
-    for (size_t i = 0; i < path.size(); ++i) {
-      const auto& wp = path[i];
-      double dx = wp.pose.position.x - cur_x;
-      double dy = wp.pose.position.y - cur_y;
-      double local_x = dx * cos(-yaw) - dy * sin(-yaw);
-      double local_y = dx * sin(-yaw) + dy * cos(-yaw);
-      ptsx.push_back(local_x);
-      ptsy.push_back(local_y);
-      #if __MPC_LOG__
-      RCLCPP_INFO(this->get_logger(), "Waypoint %zu: global(%.3f, %.3f), local(%.3f, %.3f)", 
-                  i, wp.pose.position.x, wp.pose.position.y, local_x, local_y);
-      #endif
+    for (const auto& wp : path) {
+        double dx = wp.pose.position.x - cur_x;
+        double dy = wp.pose.position.y - cur_y;
+        double local_x = dx * cos(-yaw) - dy * sin(-yaw);
+        double local_y = dx * sin(-yaw) + dy * cos(-yaw);
+        ptsx.push_back(local_x);
+        ptsy.push_back(local_y);
     }
 
 #if __MPC_LOG__
-      RCLCPP_DEBUG(get_logger(), "[MPC] Transformed %zu path points to vehicle frame.", ptsx.size());
+    RCLCPP_DEBUG(get_logger(), "[MPC] Current pose - x: %.3f, y: %.3f, yaw: %.3f", cur_x, cur_y, yaw);
 #endif
 
     //경로 포인트가 4개 미만이면 다항식 피팅과 MPC 계산이 신뢰x
@@ -343,8 +322,7 @@ geometry_msgs::msg::TwistStamped MpcMotionController::computeVelocityCommands()
         return cmd_vel;
     }
 
-    // 3. 3차 다항식 피팅
-    //경로를 부드러운 함수 형태로 표현해서, 차량과 경로 간 오차 계산과 MPC 최적화가 쉽게 하기 위함
+    // 3차 다항식 피팅
     Eigen::VectorXd ptsx_eig = Eigen::Map<Eigen::VectorXd>(ptsx.data(), ptsx.size());
     Eigen::VectorXd ptsy_eig = Eigen::Map<Eigen::VectorXd>(ptsy.data(), ptsy.size());
     Eigen::VectorXd coeffs = polyfit(ptsx_eig, ptsy_eig, 3);
@@ -353,7 +331,7 @@ geometry_msgs::msg::TwistStamped MpcMotionController::computeVelocityCommands()
     RCLCPP_DEBUG(get_logger(), "[MPC] Polynomial coefficients: %.5f, %.5f, %.5f, %.5f",
                  coeffs[0], coeffs[1], coeffs[2], coeffs[3]);
 #endif
-    // 4. 차량 상태 정의
+
     //  1. cte (Cross Track Error, 횡방향 오차)
     //      polyeval(coeffs, 0.0) 은 다항식 경로에서 x=0 위치에서의 y값을 계산
     //      여기서 x=0은 차량 기준 좌표계에서 차량 위치를 의미
@@ -370,6 +348,7 @@ geometry_msgs::msg::TwistStamped MpcMotionController::computeVelocityCommands()
     //      차량 기준 좌표계에서 차량 heading이 0일 때,
     //      epsi = 0 - atan(f'(0)) 로 차량 방향과 경로 방향 차이
     //      따라서 epsi 를 etheta 대신 사용 
+
     double v = current_odom_.twist.twist.linear.x;
     double cte = polyeval(coeffs, 0.0); // cte = f(0) - 0 = f(0) <- x = 0 기준, x=0에서의 오차
     double etheta = impThetaError(yaw, coeffs, ptsx.size(), 0.3);
@@ -377,6 +356,8 @@ geometry_msgs::msg::TwistStamped MpcMotionController::computeVelocityCommands()
 #if __MPC_LOG__
     RCLCPP_DEBUG(get_logger(), "[MPC] Vehicle state - v: %.3f, CTE: %.3f, eTheta: %.3f", v, cte, etheta);
 #endif
+    // 차량 상태 벡터
+    Eigen::VectorXd state(6);
 
     /**
     | 인덱스 | 변수명     | 의미                     | 현재 코드에서의 값           |
@@ -388,7 +369,7 @@ geometry_msgs::msg::TwistStamped MpcMotionController::computeVelocityCommands()
     | 4   | cte     | 크로스 트랙 에러 (경로와의 거리 오차) | 다항식 평가한 값, x=0 기준    |
     | 5   | etheta  | 차량 진행 방향과 목표 궤적 기울기 차이 | yaw 오차 (자세 오차)       |
     */
-    Eigen::VectorXd state(6);
+
     if (delay_mode_)
     {
         // Kinematic model is used to predict vehicle state at the actual moment of
@@ -405,33 +386,32 @@ geometry_msgs::msg::TwistStamped MpcMotionController::computeVelocityCommands()
     }
     else
     {
-        //<--
         state << 0, 0, 0, v, cte, etheta;
     }  
-    // 5. MPC 최적화 실행
-    //MPC 함수 역할
+ 
+    // MPC 최적화
     //주어진 상태에서 차량이 앞으로 어떻게 움직일지 예측 모델을 기반으로차량의 물리적 동역학을 반영해
     //경로와 최대한 일치하면서도 제약조건(속도 제한, 최대 가속, 조향 각도 등)을 지키는 최적의 제어 명령 
     //(가속도, 조향각 속도 등)을 계산해 반환
+
     auto start_time = rclcpp::Clock().now();
     std::vector<double> mpc_results = _mpc.Solve(state, coeffs);
     auto end_time = rclcpp::Clock().now();
 
     if (mpc_results.size() < 2) {
-      RCLCPP_ERROR(get_logger(), "MPC result invalid.");
-      cmd_vel.twist.linear.x = 0.0;
-      cmd_vel.twist.angular.z = 0.0;
-      return cmd_vel;
+        RCLCPP_ERROR(get_logger(), "MPC result invalid.");
+        cmd_vel.twist.linear.x = 0.0;
+        cmd_vel.twist.angular.z = 0.0;
+        return cmd_vel;
     }
 #if __MPC_LOG__
     RCLCPP_INFO(get_logger(), "MPC Solve duration: %.6f sec", (end_time - start_time).seconds());
 #endif
-
-    // 6. MPC 결과 처리
-    // MPC result (all described in car frame), output = (acceleration, w)
+    
+    // MPC 결과 처리
     w_ = mpc_results[0];        // 각속도(rad/s)
     throttle_ = mpc_results[1]; // 가속도(m/s^2)
-    speed_ = std::clamp(v + throttle_ * dt_, 0.0, max_speed_); //max_speed_ = 0.5 m/s
+    speed_ = std::clamp(v + throttle_ * dt_, 0.0, max_speed_); ////max_speed_ = 0.5 m/s
 
     cmd_vel.header = current_odom_.header;
     cmd_vel.twist.linear.x = speed_;
