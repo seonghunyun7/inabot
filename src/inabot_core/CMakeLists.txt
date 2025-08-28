@@ -20,12 +20,18 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+
+find_package(rcl_interfaces REQUIRED)
+find_package(rcutils REQUIRED)
+
 find_package(nav_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
+
 find_package(nav2_msgs REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(angles REQUIRED)
@@ -82,10 +88,11 @@ include_directories(
   include/utils
   include/wheel
   include/planner/common
-  include/planner/lidar_obstacle
   include/planner/global
   include/planner/local/mpc_motion_controller
   include/planner/local/pure_pursuit
+  include/sensor/lidar/scan_merger
+  include/sensor/lidar/lidar_obstacle
   ${EIGEN3_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
 )
@@ -106,10 +113,11 @@ file(GLOB SOURCES
   "src/utils/*.cpp"
   "src/wheel/*.cpp"
   "src/planner/common/*.cpp"
-  "src/planner/lidar_obstacle/*.cpp"
   "src/planner/global/*.cpp"
   "src/planner/local/mpc_motion_controller/*.cpp"
   "src/planner/local/pure_pursuit/*.cpp"
+  "src/sensor/lidar/scan_merger/*.cpp"   # <- 추가
+  "src/sensor/lidar/lidar_obstacle/*.cpp"
 )
 
 # MPC core library
@@ -133,6 +141,9 @@ ament_target_dependencies(inabot_core
   tf2_ros
   tf2
   tf2_geometry_msgs
+  tf2_sensor_msgs      # <- scan_merger용
+  rcl_interfaces
+  rcutils
   nav2_msgs
   yaml-cpp
   angles

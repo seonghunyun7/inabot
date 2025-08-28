@@ -139,3 +139,36 @@ lidar_obstacle_detector:
     # Update the values below to match your robot's actual shape and size.
     # Example: front-right (x=0.401m, y=0.27346m), front-left, rear-left, rear-right.
     polygon: [0.401, 0.27346, 0.401, -0.27346, -0.401, -0.27346, -0.401, 0.27346]
+
+
+###
+laser_scan_merger:
+  ros__parameters:
+    # General parameter for the integrated laserscan
+    integrated_topic: "scan_merged"        # scan_merge, scan
+    integrated_frame_id: "base_scan"
+
+    # First laserscan
+    scan_topic_1: "scan_front"
+    laser_1_x_off: 0.0
+    laser_1_y_off: 0.0
+    laser_1_yaw: 0.0
+    show_1: true
+
+    # Second laserscan
+    scan_topic_2: "scan_rear"
+    laser_2_x_off: 0.0
+    laser_2_y_off: 0.0
+    laser_2_yaw: 0.0
+    show_2: true
+
+    # Robot dimensions (for obstacle ROI / clipping)
+    robot_front_end: 0.1   # [m]
+    robot_rear_end: 0.1
+    robot_right_end: 0.1
+    robot_left_end: 0.1
+
+    # Remove points within this radius (optional)
+    remove_radius: 0.2     # [m]
+    use_time_synchronizer: true  # true: enable message_filters TimeSynchronizer
+    publish_occupancy_grid: false  # true: enable publish_occupancy_grid

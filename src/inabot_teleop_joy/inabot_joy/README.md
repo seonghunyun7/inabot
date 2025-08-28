@@ -72,3 +72,54 @@ ros2 launch inabot_joy joy_start.launch.py
     조이스틱이 인식되지 않으면 ls /dev/input/ 또는 jstest 명령어로 연결 상태를 확인하세요.
 
     udev 규칙이나 권한 설정이 필요할 수 있습니다 (/dev/input/js0 접근 권한 등).
+
+
+    sudo nano /etc/udev/rules.d/99-joystick.rules
+    KERNEL=="js[0-9]*", MODE="0666"
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger
+    ls -l /dev/input/js0    
+    crw-rw-rw- 처럼 읽기/쓰기 권한이 적용되어 있어야 합니다.
+
+
+# -------------------------------
+# Logitech F310/F710 조이스틱 고정
+# -------------------------------
+KERNEL=="js[0-9]*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c216", MODE:="0666", SYMLINK+="my_joystick"
+
+
+Bus 001 Device 005: ID 046d:c216 Logitech, Inc. F310 Gamepad
+→ Vendor: 046d, Product: c216
+->SYMLINK+="my_joystick" → /dev/my_joystick라는 고정 장치 이름 생성
+
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+이제 USB 연결 시 /dev/my_joystick로 접근 가능
+
+2️⃣ udev 기반 접근
+USB 조이스틱 연결
+        │
+        ▼
+   Linux 커널 /dev/input/jsN
+        │
+        ▼
+    joy_node device_id:=0
+
+    device_id:=0 → 첫 번째 인식된 조이스틱 (/dev/input/js0)
+
+    문제점:
+
+        USB 포트 순서가 바뀌면 /dev/input/js0가 달라짐
+
+        여러 장치 연결 시 순서가 바뀔 수 있음
+
+2️⃣ udev 기반 접근
+USB 조이스틱 연결
+        │
+    udev 규칙 적용
+        │
+        ▼
+   /dev/my_joystick  <-- 고정 이름
+        │
+        ▼
+    joy_node dev:=/dev/my_joystick

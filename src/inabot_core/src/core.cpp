@@ -24,7 +24,9 @@
 #include "planner/local/pure_pursuit/pure_pursuit.hpp"
 #include "planner/local/mpc_motion_controller/mpc_motion_controller.hpp" 
 #include "planner/global/global_planner.hpp"
-#include "planner/lidar_obstacle/lidar_obstacle_detector.hpp"
+//#include "planner/lidar_obstacle/lidar_obstacle_detector.hpp"
+#include "sensor/lidar/lidar_obstacle/lidar_obstacle_detector.hpp"  
+#include "sensor/lidar/scan_merger/scan_merger.hpp" 
 
 using namespace Inabot;
 
@@ -72,9 +74,8 @@ int main(int argc, char** argv)
     auto odom_node = std::make_shared<OdometryNode>(options); 
     auto imu_node = std::make_shared<ImuNode>(options);
     auto monitor_node = std::make_shared<MonitorNode>(options);
-    auto lidar_obstacle_detector_node = std::make_shared<LidarObstacleDetector>(options);
-#endif
     auto global_planner_node = std::make_shared<GlobalPlanner>(options);
+
 #ifdef USE_PURE_PURSUIT 
     auto pure_pursuit_node = std::make_shared<pure_pursuit>(options);
     std::cout << "[INFO] Using Pure Pursuit planner." << std::endl;
@@ -82,6 +83,10 @@ int main(int argc, char** argv)
     auto mpc_motion_controller_node = std::make_shared<MpcMotionController>(options);
     std::cout << "[INFO] Using MPC motion controller." << std::endl;
 #endif
+#endif
+
+    auto scan_merger_node = std::make_shared<scanMerger>(options);
+    auto lidar_obstacle_detector_node = std::make_shared<LidarObstacleDetector>(options);
 
     //register of the node
     rclcpp::executors::MultiThreadedExecutor executor;
@@ -93,13 +98,17 @@ int main(int argc, char** argv)
     executor.add_node(imu_node);
     executor.add_node(monitor_node);
     executor.add_node(lidar_obstacle_detector_node);
-#endif
+
     executor.add_node(global_planner_node);
 #ifdef USE_PURE_PURSUIT
     executor.add_node(pure_pursuit_node);
 #else
     executor.add_node(mpc_motion_controller_node);
 #endif
+#endif
+
+    executor.add_node(scan_merger_node);
+    executor.add_node(lidar_obstacle_detector_node);
 
     try {
         executor.spin();

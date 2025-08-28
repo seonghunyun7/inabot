@@ -1,4 +1,4 @@
-#include "planner/lidar_obstacle/lidar_obstacle_detector.hpp"
+#include "sensor/lidar/lidar_obstacle/lidar_obstacle_detector.hpp"  
 
 LidarObstacleDetector::LidarObstacleDetector(const rclcpp::NodeOptions& options)
   : Node("lidar_obstacle_detector", options)

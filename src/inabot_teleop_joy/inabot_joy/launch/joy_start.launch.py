@@ -9,6 +9,7 @@ def generate_launch_description():
 
     return LaunchDescription([
 
+        # device_id:=0 → /dev/input/js0 (첫 번째 조이스틱)
         ExecuteProcess(
             cmd=['ros2', 'run', 'joy', 'joy_node', '--ros-args', '-p', 'device_id:=0'],
             output='screen'
