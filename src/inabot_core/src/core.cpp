@@ -24,10 +24,12 @@
 #include "planner/local/pure_pursuit/pure_pursuit.hpp"
 #include "planner/local/mpc_motion_controller/mpc_motion_controller.hpp" 
 #include "planner/global/global_planner.hpp"
-//#include "planner/lidar_obstacle/lidar_obstacle_detector.hpp"
 #include "sensor/lidar/lidar_obstacle/lidar_obstacle_detector.hpp"  
 #include "sensor/lidar/scan_merger/scan_merger.hpp" 
 
+//aruco qr marker
+#include "sensor/cam/qr_aruco/aruco_qr_localizer.hpp" 
+ 
 using namespace Inabot;
 
 rclcpp::executors::MultiThreadedExecutor* global_executor = nullptr;
@@ -83,10 +85,10 @@ int main(int argc, char** argv)
     auto mpc_motion_controller_node = std::make_shared<MpcMotionController>(options);
     std::cout << "[INFO] Using MPC motion controller." << std::endl;
 #endif
-#endif
-
     auto scan_merger_node = std::make_shared<scanMerger>(options);
     auto lidar_obstacle_detector_node = std::make_shared<LidarObstacleDetector>(options);
+#endif
+    auto aruco_localizer_node = std::make_shared<ArucoLocalizer>(options);
 
     //register of the node
     rclcpp::executors::MultiThreadedExecutor executor;
@@ -105,10 +107,11 @@ int main(int argc, char** argv)
 #else
     executor.add_node(mpc_motion_controller_node);
 #endif
-#endif
-
     executor.add_node(scan_merger_node);
     executor.add_node(lidar_obstacle_detector_node);
+#endif
+
+    executor.add_node(aruco_localizer_node);
 
     try {
         executor.spin();

@@ -27,7 +27,9 @@
   <depend>message_filters</depend>
   <!-- 커스텀 메시지 패키지 의존 추가 -->
   <depend>inabot_msgs</depend>
- 
+  <depend>opencv4</depend>  <!-- Humble부터 OpenCV4 기본 -->
+  <depend>cv_bridge</depend>
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>

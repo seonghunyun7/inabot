@@ -1,3 +1,26 @@
+          
+          
+sudo apt install python3-can
+
+Ubuntu 22.04 (ROS2 Humble 기본 OS) 기준으로 사용 가능
+
+설치 후, Python에서 바로 import can으로 사용 가능
+
+참고
+
+ROS2 패키지와는 별개입니다. 순수 Python SocketCAN 용도로 설치하는 것
+
+CAN 인터페이스 준비:
+
+sudo ip link set can0 up type can bitrate 500000
+
+테스트:
+
+python3 -c "import can; print(can.__version__)"
+
+    설치 확인용
+
+          
           ┌────────────────────┐
           │ DummyOdomAndPathNode│
           └───────┬─────────────┘

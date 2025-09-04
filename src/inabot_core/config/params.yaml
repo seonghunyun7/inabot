@@ -140,7 +140,6 @@ lidar_obstacle_detector:
     # Example: front-right (x=0.401m, y=0.27346m), front-left, rear-left, rear-right.
     polygon: [0.401, 0.27346, 0.401, -0.27346, -0.401, -0.27346, -0.401, 0.27346]
 
-
 ###
 laser_scan_merger:
   ros__parameters:
@@ -171,4 +170,23 @@ laser_scan_merger:
     # Remove points within this radius (optional)
     remove_radius: 0.2     # [m]
     use_time_synchronizer: true  # true: enable message_filters TimeSynchronizer
-    publish_occupancy_grid: false  # true: enable publish_occupancy_grid
+    publish_occupancy_grid: true  # true: enable publish_occupancy_grid
+
+### aruco marker
+# 5~10cm, DICT_5X5_250 또는 1000
+#DICT_5X5_50	4	5×5 비트, 50개 마커
+#DICT_5X5_100	5	5×5 비트, 100개 마커
+#DICT_5X5_250	6	5×5 비트, 250개 마커
+#DICT_5X5_1000	7	5×5 비트, 1000개 마커
+#컬러 카메라 프레임: /camera_color_frame
+#깊이 카메라 프레임: /camera_depth_frame
+#IR 카메라 프레임: /camera_ir_frame
+aruco_localizer:
+ ros__parameters:
+    aruco_id: 0 
+    marker_size: 0.05 
+    aruco_dictionary_id: 6 # DICT_5X5_250
+    image_topic: "/camera/color/image_raw"
+    camera_info_topic: "/camera/color/camera_info"
+    camera_frame: "camera_color_frame"  # Orbbec에서 카메라 프레임 이름
+    qr_topic: "/camera/color/qr_image_raw"

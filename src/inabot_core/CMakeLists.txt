@@ -15,6 +15,10 @@ if(USE_PURE_PURSUIT)
   add_compile_definitions(USE_PURE_PURSUIT)
 endif()
 
+# ZXing include & lib
+include_directories(/usr/local/include)
+link_directories(/usr/local/lib)
+
 # Required ROS 2 and system packages
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -57,6 +61,15 @@ find_package(Boost REQUIRED COMPONENTS
   regex
 )
 
+find_package(cv_bridge REQUIRED)
+
+# opencv
+#find_package(OpenCV REQUIRED COMPONENTS core imgproc highgui aruco)
+find_package(OpenCV REQUIRED)
+
+# zxing-cpp
+find_package(ZXing REQUIRED)
+
 # serial library
 include_directories(/usr/local/include)
 find_library(SERIAL_LIBRARY
@@ -93,8 +106,10 @@ include_directories(
   include/planner/local/pure_pursuit
   include/sensor/lidar/scan_merger
   include/sensor/lidar/lidar_obstacle
+  include/sensor/cam/qr_aruco
   ${EIGEN3_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 # Automatically collect all source files
@@ -118,6 +133,7 @@ file(GLOB SOURCES
   "src/planner/local/pure_pursuit/*.cpp"
   "src/sensor/lidar/scan_merger/*.cpp"   # <- 추가
   "src/sensor/lidar/lidar_obstacle/*.cpp"
+  "src/sensor/cam/qr_aruco/*.cpp"
 )
 
 # MPC core library
@@ -157,6 +173,7 @@ ament_target_dependencies(inabot_core
   message_filters
   vision_msgs
   inabot_msgs
+  cv_bridge
 )
 
 target_include_directories(inabot_core PRIVATE
@@ -167,6 +184,8 @@ target_include_directories(inabot_core PRIVATE
   include/monitor
   ${EIGEN3_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
+  ${cv_bridge_INCLUDE_DIRS}
 )
 
 # Link system and custom libraries
@@ -183,6 +202,8 @@ target_link_libraries(inabot_core
   ${SERIAL_LIBRARY} # serial library
   control_toolbox::control_toolbox
   ${PCL_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  ZXing
 )
 
 # Install executable
