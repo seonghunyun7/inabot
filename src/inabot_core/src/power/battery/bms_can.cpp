@@ -66,7 +66,9 @@ void CBmsCan::connectCan()
         return;
     }
 
-    std::strncpy(ifr.ifr_name, can_interface_.c_str(), IFNAMSIZ);
+    //std::strncpy(ifr.ifr_name, can_interface_.c_str(), IFNAMSIZ);
+    std::strncpy(ifr.ifr_name, can_interface_.c_str(), IFNAMSIZ - 1);
+    ifr.ifr_name[IFNAMSIZ - 1] = '\0';
     if (ioctl(can_socket_, SIOCGIFINDEX, &ifr) < 0) {
         RCLCPP_WARN(this->get_logger(), "CAN interface %s not found", can_interface_.c_str());
         close(can_socket_);

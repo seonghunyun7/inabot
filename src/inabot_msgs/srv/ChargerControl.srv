@@ -1,0 +1,7 @@
+# Request
+bool start
+float32 voltage
+float32 current
+---
+# Response
+bool success

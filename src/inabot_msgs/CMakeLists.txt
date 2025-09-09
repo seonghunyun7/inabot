@@ -26,7 +26,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 	"msg/ObstacleStatus.msg"
 	"msg/BmsState.msg"
 	"msg/BmsCanFrame.msg"
+	"msg/BirdChargerStatus.msg"
+	"msg/CanFrame.msg"
 	"msg/ArucoMarkers.msg"
+	"srv/ChargerControl.srv"
   	DEPENDENCIES std_msgs geometry_msgs trajectory_msgs sensor_msgs builtin_interfaces nav2_msgs
 )
 

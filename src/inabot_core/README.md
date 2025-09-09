@@ -109,6 +109,10 @@ IMU, LiDAR, 카메라 기반 마커 인식
 
 📁 빌드 및 실행 방법
 # 워크스페이스 최상위에서
+colcon build --packages-select inabot_msgs
+colcon build --packages-select inabot_description 
+source ~/.bashrc
+
 colcon build --packages-select inabot_core
 source install/setup.bash
 

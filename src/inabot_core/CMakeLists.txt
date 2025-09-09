@@ -99,6 +99,7 @@ include_directories(
   include/motor/utils
   include/odom
   include/power/battery
+  include/power/charger
   include/utils
   include/wheel
   include/planner/common
@@ -127,6 +128,7 @@ file(GLOB SOURCES
   "src/motor/utils/*.cpp"
   "src/odom/*.cpp"
   "src/power/battery/*.cpp"
+  "src/power/charger/*.cpp"
   "src/utils/*.cpp"
   "src/wheel/*.cpp"
   "src/planner/common/*.cpp"

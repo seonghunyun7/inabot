@@ -191,7 +191,10 @@ aruco_localizer:
     camera_frame: "camera_color_frame"  # Orbbec에서 카메라 프레임 이름
     qr_topic: "/camera/color/qr_image_raw"
 
-
 bms_can:
+  ros__parameters:
+    can_interface: "can0"
+
+buzzard40_bird_node:
   ros__parameters:
     can_interface: "can0"

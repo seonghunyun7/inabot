@@ -31,6 +31,8 @@
 #include "sensor/cam/qr_aruco/aruco_qr_localizer.hpp" 
 // bms
 #include "power/battery/bms_can.hpp"
+// charger
+#include "power/charger/bird_charger.hpp"
 
 using namespace Inabot;
 
@@ -90,9 +92,9 @@ int main(int argc, char** argv)
     auto scan_merger_node = std::make_shared<scanMerger>(options);
     auto lidar_obstacle_detector_node = std::make_shared<LidarObstacleDetector>(options);
     auto aruco_localizer_node = std::make_shared<ArucoLocalizer>(options);
-#endif
-
     auto bms_can_node = std::make_shared<CBmsCan>(options);
+#endif
+    auto charger_node = std::make_shared<BirdChargerNode>(options);
 
     //register of the node
     rclcpp::executors::MultiThreadedExecutor executor;
@@ -114,8 +116,9 @@ int main(int argc, char** argv)
     executor.add_node(scan_merger_node);
     executor.add_node(lidar_obstacle_detector_node);
     executor.add_node(aruco_localizer_node);
-#endif
     executor.add_node(bms_can_node);
+#endif
+    executor.add_node(charger_node);
 
     try {
         executor.spin();

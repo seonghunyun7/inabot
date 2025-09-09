@@ -1,3 +1,4 @@
+# BmsState.msg
 # 표준 BatteryState 필드 포함
 float32 voltage
 float32 current
