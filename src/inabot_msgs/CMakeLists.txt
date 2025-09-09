@@ -23,8 +23,10 @@ find_package(nav2_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  	"msg/ObstacleStatus.msg"
-    	"msg/ArucoMarkers.msg"
+	"msg/ObstacleStatus.msg"
+	"msg/BmsState.msg"
+	"msg/BmsCanFrame.msg"
+	"msg/ArucoMarkers.msg"
   	DEPENDENCIES std_msgs geometry_msgs trajectory_msgs sensor_msgs builtin_interfaces nav2_msgs
 )
 

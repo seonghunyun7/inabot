@@ -98,6 +98,7 @@ include_directories(
   include/motor/kinematics
   include/motor/utils
   include/odom
+  include/power/battery
   include/utils
   include/wheel
   include/planner/common
@@ -125,6 +126,7 @@ file(GLOB SOURCES
   "src/motor/kinematics/*.cpp"
   "src/motor/utils/*.cpp"
   "src/odom/*.cpp"
+  "src/power/battery/*.cpp"
   "src/utils/*.cpp"
   "src/wheel/*.cpp"
   "src/planner/common/*.cpp"

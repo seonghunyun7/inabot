@@ -72,3 +72,40 @@ python3 -c "import can; print(can.__version__)"
 단거리 목표	0.3 ~ 1.0	세밀한 장애물 회피, 안전 주행
 중거리 목표	1.0 ~ 3.0	효율적 경로 계획 및 트래젝토리 추종
 장거리 목표	5m 이상	글로벌 플래너가 담당, 로컬 플래너와 분리
+
+
+## BMS CAN Dummy Publisher for ROS2 Humble
+
+더미 데이터 설명
+
+0x101: Pack Info (HW/FW, Capacity, Remaining, Cycle Count)
+
+0x102: Pack Voltage
+
+0x103: Current / SOC / SOH / Serial
+
+0x104: Cell Temperature
+
+0x105: Cell Voltages (8 bytes)
+
+모든 값은 랜덤화되어 있으며, 실제 배터리 상태와 무관합니다.
+테스트 목적: C++ 파서 로직 검증
+
+python3 dummy_can_pub.py
+
+ros2 topic echo /bms_can_frame
+
+id: 258
+data:
+- 1
+- 196
+- 0
+- 0
+- 0
+- 0
+- 0
+- 0
+dlc: 8
+---
+id: 259
+data:

@@ -29,7 +29,9 @@
 
 //aruco qr marker
 #include "sensor/cam/qr_aruco/aruco_qr_localizer.hpp" 
- 
+// bms
+#include "power/battery/bms_can.hpp"
+
 using namespace Inabot;
 
 rclcpp::executors::MultiThreadedExecutor* global_executor = nullptr;
@@ -87,8 +89,10 @@ int main(int argc, char** argv)
 #endif
     auto scan_merger_node = std::make_shared<scanMerger>(options);
     auto lidar_obstacle_detector_node = std::make_shared<LidarObstacleDetector>(options);
-#endif
     auto aruco_localizer_node = std::make_shared<ArucoLocalizer>(options);
+#endif
+
+    auto bms_can_node = std::make_shared<CBmsCan>(options);
 
     //register of the node
     rclcpp::executors::MultiThreadedExecutor executor;
@@ -109,9 +113,9 @@ int main(int argc, char** argv)
 #endif
     executor.add_node(scan_merger_node);
     executor.add_node(lidar_obstacle_detector_node);
-#endif
-
     executor.add_node(aruco_localizer_node);
+#endif
+    executor.add_node(bms_can_node);
 
     try {
         executor.spin();
