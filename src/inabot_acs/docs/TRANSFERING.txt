@@ -1,0 +1,180 @@
+TRANSFERING
+{
+    "headerId": 5673,
+    "timestamp": "2025-06-23T16:50:35.851Z",
+    "version": "2.0.0",
+    "manufacturer": "Inatech",
+    "serialNumber": "P3LDD02",
+    "orderId": "ACS-1000122531",
+    "orderUpdateId": 33,
+    "driving": true,
+    "paused": false,
+    "newBaseRequest": false,
+    "distanceSinceLastNode": 0,
+    "QR": "SP3ECTR001\r",
+    "operatingMode": "AUTOMATIC",
+    "lastNodeId": "298",
+    "lastNodeSequenceId": 110,
+    "nodeStates": [{
+            "nodeId": "23",
+            "sequenceId": 112,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 288.202,
+                "y": 3.1,
+                "theta": 0,
+                "mapId": "P3"
+            },
+            "released": true
+        }, {
+            "nodeId": "762",
+            "sequenceId": 114,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 293.723,
+                "y": 3.1,
+                "theta": 0,
+                "mapId": "P3"
+            },
+            "released": true
+        }, {
+            "nodeId": "126",
+            "sequenceId": 116,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 297.723,
+                "y": 3.1,
+                "theta": 0,
+                "mapId": "P3"
+            },
+            "released": true
+        }, {
+            "nodeId": "10111",
+            "sequenceId": 118,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 297.723,
+                "y": 5.402,
+                "theta": 0,
+                "mapId": "P3"
+            },
+            "released": false
+        }, {
+            "nodeId": "10121",
+            "sequenceId": 120,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 297.723,
+                "y": 6.96,
+                "theta": 0,
+                "mapId": "P3"
+            },
+            "released": false
+        }
+    ],
+    "edgeStates": [{
+            "edgeId": "298_23",
+            "sequenceId": 111,
+            "released": true
+        }, {
+            "edgeId": "23_762",
+            "sequenceId": 113,
+            "released": true
+        }, {
+            "edgeId": "762_126",
+            "sequenceId": 115,
+            "released": true
+        }, {
+            "edgeId": "126_10111",
+            "sequenceId": 117,
+            "released": false
+        }, {
+            "edgeId": "10111_10121",
+            "sequenceId": 119,
+            "released": false
+        }
+    ],
+    "LoadFactor": {
+        "Front_Traction": 15,
+        "Front_Steer": 0,
+        "Rear_Traction": 29,
+        "Rear_Steer": -3
+    },
+    "agvPosition": {
+        "positionInitialized": true,
+        "localizationScore": 1,
+        "deviationRange": 0,
+        "x": 281.088958740234,
+        "y": 3.08374118804932,
+        "theta": 0.00663599837571383,
+        "mapId": "",
+        "mapDescription": ""
+    },
+    "velocity": {
+        "vx": 0.700948178768158,
+        "vy": 0.0470487922430038,
+        "omega": 0
+    },
+    "loads": [{
+            "loadId": "SP3ECTR001\rr\u0002",
+            "loadType": "Small",
+            "boundingBoxReference": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "theta": 0
+            },
+            "loadDimensions": {
+                "length": 0,
+                "width": 0,
+                "height": 0
+            },
+            "weight": 0
+        }
+    ],
+    "actionStates": [],
+    "batteryState": {
+        "batteryCharge": 36.1,
+        "batteryVoltage": 50.7,
+        "batteryHealth": 10,
+        "charging": false,
+        "HardWareVer": 11,
+        "FirmwareVer": 14,
+        "PackTotalCap": 540,
+        "PackRemCap": 194,
+        "CycleCount": 71,
+        "BatteryStatus": 1,
+        "ProtectionFlag": 0,
+        "WarningFlag": 0,
+        "batteryAmps": -7.2,
+        "CellTemp_1": 28.5,
+        "CellTemp_2": 28.3,
+        "CellVolt_1": 314.8,
+        "CellVolt_2": 317.6,
+        "CellVolt_3": 316.2,
+        "CellVolt_4": 316.5,
+        "CellVolt_5": 316.7,
+        "CellVolt_6": 315.8,
+        "CellVolt_7": 316.4,
+        "CellVolt_8": 316.9,
+        "CellVolt_9": 317.3,
+        "CellVolt_10": 317.5,
+        "CellVolt_11": 317.3,
+        "CellVolt_12": 317.4,
+        "CellVolt_13": 317.7,
+        "CellVolt_14": 317.2,
+        "CellVolt_15": 317.1,
+        "CellVolt_16": 316.1,
+        "reach": 0
+    },
+    "errors": [],
+    "information": [],
+    "safetyState": {
+        "eStop": "AUTOACK",
+        "fieldViolation": false
+    }
+}
+
+
+
+

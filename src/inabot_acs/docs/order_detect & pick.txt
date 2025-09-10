@@ -1,0 +1,82 @@
+{
+    "headerId": 8625,
+    "timestamp": "2025-07-04T07:03:14.27Z",
+    "version": "2.0.0",
+    "manufacturer": "Inatech",
+    "serialNumber": "P3LDD02",
+    "orderId": "ACS-1000122797",
+    "orderUpdateId": 0,
+    "zoneSetId": "",
+    "nodes": [{
+            "nodeId": "11542",
+            "sequenceId": 0,
+            "released": true,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 4.108E1,
+                "y": 3.15E0,
+                "mapId": "P3",
+                "allowedDeviationXY": 1E-1
+            },
+            "actions": []
+        }, {
+            "nodeId": "11543",
+            "sequenceId": 2,
+            "released": true,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 4.108E1,
+                "y": 3.4E0,
+                "mapId": "P3",
+                "allowedDeviationXY": 2E-1
+            },
+            "actions": [{
+                    "actionId": "detect",
+                    "actionParameters": [],
+                    "actionType": "detectObject",
+                    "blockingType": "HARD"
+                }
+            ]
+        }, {
+            "nodeId": "11544",
+            "sequenceId": 4,
+            "released": true,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 4.108E1,
+                "y": 4.9E0,
+                "mapId": "P3",
+                "allowedDeviationXY": 5E-1
+            },
+            "actions": [{
+                    "actionId": "pick",
+                    "actionParameters": [],
+                    "actionType": "pick",
+                    "blockingType": "HARD"
+                }
+            ]
+        }
+    ],
+    "edges": [{
+            "edgeId": "11542_11543",
+            "sequenceId": 1,
+            "released": true,
+            "startNodeId": "11542",
+            "endNodeId": "11543",
+            "maxSpeed": 1E-1,
+            "orientation": 3.141592653589793E0,
+            "rotationAllowed": false,
+            "actions": []
+        }, {
+            "edgeId": "11543_11544",
+            "sequenceId": 3,
+            "released": true,
+            "startNodeId": "11543",
+            "endNodeId": "11544",
+            "maxSpeed": 1E-1,
+            "orientation": 3.141592653589793E0,
+            "rotationAllowed": false,
+            "actions": []
+        }
+    ]
+}

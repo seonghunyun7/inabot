@@ -1,0 +1,51 @@
+{
+  "headerId": 8096,
+  "timestamp": "2025-06-30T04:52:11.39Z",
+  "version": "2.0.0",
+  "manufacturer": "Inatech",
+  "serialNumber": "P3LDD02",
+  "orderId": "ACS-1000122678",
+  "orderUpdateId": 0,
+  "zoneSetId": "",
+  "nodes": [
+    {
+      "nodeId": "10002",
+      "sequenceId": 0,
+      "released": true,
+      "nodeDescription": "",
+      "nodePosition": {
+        "x": 221.33,
+        "y": -44.428,
+        "mapId": "P3",
+        "allowedDeviationXY": 0.5
+      },
+      "actions": []
+    },
+    {
+      "nodeId": "89",
+      "sequenceId": 2,
+      "released": true,
+      "nodeDescription": "",
+      "nodePosition": {
+        "x": 222.7,
+        "y": -44.428,
+        "mapId": "P3",
+        "allowedDeviationXY": 0.2
+      },
+      "actions": []
+    }
+  ],
+  "edges": [
+    {
+      "edgeId": "10002_89",
+      "sequenceId": 1,
+      "released": true,
+      "startNodeId": "10002",
+      "endNodeId": "89",
+      "maxSpeed": 0.05,
+      "orientation": 3.141592653589793,
+      "rotationAllowed": false,
+      "actions": []
+    }
+  ]
+}

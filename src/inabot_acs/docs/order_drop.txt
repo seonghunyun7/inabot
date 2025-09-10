@@ -1,0 +1,98 @@
+{
+    "headerId": 8669,
+    "timestamp": "2025-07-04T07:32:05.50Z",
+    "version": "2.0.0",
+    "manufacturer": "Inatech",
+    "serialNumber": "P3LDD02",
+    "orderId": "ACS-1000122799",
+    "orderUpdateId": 0,
+    "zoneSetId": "",
+    "nodes": [{
+            "nodeId": "10121",
+            "sequenceId": 0,
+            "released": true,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 2.97723E2,
+                "y": 6.1E0,
+                "mapId": "P3",
+                "allowedDeviationXY": 2E-1
+            },
+            "actions": []
+        }, {
+            "nodeId": "10122",
+            "sequenceId": 2,
+            "released": true,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 2.9825E2,
+                "y": 6.1E0,
+                "mapId": "P3",
+                "allowedDeviationXY": 1E-1
+            },
+            "actions": []
+        }, {
+            "nodeId": "10123",
+            "sequenceId": 4,
+            "released": true,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 2.985E2,
+                "y": 6.1E0,
+                "mapId": "P3",
+                "allowedDeviationXY": 2E-1
+            },
+            "actions": []
+        }, {
+            "nodeId": "10124",
+            "sequenceId": 6,
+            "released": true,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 2.999E2,
+                "y": 6.1E0,
+                "mapId": "P3",
+                "allowedDeviationXY": 5E-1
+            },
+            "actions": [{
+                    "actionId": "drop",
+                    "actionParameters": [],
+                    "actionType": "drop",
+                    "blockingType": "HARD"
+                }
+            ]
+        }
+    ],
+    "edges": [{
+            "edgeId": "10121_10122",
+            "sequenceId": 1,
+            "released": true,
+            "startNodeId": "10121",
+            "endNodeId": "10122",
+            "maxSpeed": 1E-1,
+            "orientation": 3.141592653589793E0,
+            "rotationAllowed": false,
+            "actions": []
+        }, {
+            "edgeId": "10122_10123",
+            "sequenceId": 3,
+            "released": true,
+            "startNodeId": "10122",
+            "endNodeId": "10123",
+            "maxSpeed": 1E-1,
+            "orientation": 3.141592653589793E0,
+            "rotationAllowed": false,
+            "actions": []
+        }, {
+            "edgeId": "10123_10124",
+            "sequenceId": 5,
+            "released": true,
+            "startNodeId": "10123",
+            "endNodeId": "10124",
+            "maxSpeed": 1E-1,
+            "orientation": 3.141592653589793E0,
+            "rotationAllowed": false,
+            "actions": []
+        }
+    ]
+}

@@ -1,0 +1,58 @@
+{
+  "headerId": 7180,
+  "timestamp": "2025-06-30T05:34:15.62Z",
+  "version": "2.0.0",
+  "manufacturer": "Inatech",
+  "serialNumber": "P3LDD03",
+  "orderId": "ACS-1000122687",
+  "orderUpdateId": 30,
+  "zoneSetId": "",
+  "nodes": [
+    {
+      "nodeId": "100",
+      "sequenceId": 80,
+      "released": true,
+      "nodeDescription": "",
+      "nodePosition": {
+        "x": 173.9,
+        "y": -44.24,
+        "mapId": "P3",
+        "allowedDeviationXY": 0.2
+      },
+      "actions": []
+    },
+    {
+      "nodeId": "10001",
+      "sequenceId": 82,
+      "released": true,
+      "nodeDescription": "",
+      "nodePosition": {
+        "x": 173.125,
+        "y": -44.24,
+        "mapId": "P3",
+        "allowedDeviationXY": 0.5
+      },
+      "actions": [
+        {
+          "actionId": "53c37835-3dfe-41a8-9637-a6fc32fb476f",
+          "actionType": "startCharging",
+          "actionDescription": "Activates the charging process. Charging can be done on a charging spot (vehicle standing) or on a charging lane (while driving). Protection against overcharging is responsibility of the vehicle.",
+          "blockingType": "SOFT"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "edgeId": "100_10001",
+      "sequenceId": 81,
+      "released": true,
+      "startNodeId": "100",
+      "endNodeId": "10001",
+      "maxSpeed": 0.05,
+      "orientation": 0,
+      "rotationAllowed": false,
+      "actions": []
+    }
+  ]
+}
