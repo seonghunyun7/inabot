@@ -11,18 +11,21 @@ def generate_launch_description():
             parameters=[
                 {
                     # MQTT 브로커 설정
-                    'broker_host': 'localhost',  # 실제 브로커 IP
+                    'broker_host': 'localhost',      # 로컬 테스트 브로커
                     'broker_port': 1883,
                     'client_id': 'fms_client',
-                    'clean_session': True,           # 운영용: 세션 유지
-                    'keep_alive_interval': 15,       # MQTT keepalive (초)
+                    'clean_session': False,           # LWT 테스트용
+                    'keep_alive_interval': 10,       # MQTT keepalive (초)
                     'max_inflight': 65535,
-                    'tls_enabled': False,             # 운영에서는 TLS 권장
+                    'tls_enabled': False,
+                    
                     # 로봇 식별
                     'manufacturer': 'Inatech',
                     'serial_number': 'P3LDD02',
+
                     # Heartbeat 설정
-                    'heartbeat_interval': 5,          # Heartbeat 전송 주기 (초)
+                    'heartbeat_interval': 5,          # Heartbeat 주기 (초)
+                    
                     # LWT 설정
                     'lwt_enabled': True,
                     'lwt_topic': 'uagv/v2/Inatech/P3LDD02/connection',

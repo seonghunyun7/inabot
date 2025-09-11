@@ -39,6 +39,8 @@ void HeartbeatManager::sendHeartbeat(const std::string& state) {
 
     if (publish_func_) {
         publish_func_(topic, msg.dump());
+        #if __LOG__
         std::cout << "[Heartbeat] Sent " << state << " to " << topic << std::endl;
+        #endif
     }
 }

@@ -22,6 +22,13 @@ struct ClientConfig {
     bool clean_session = true;
     int keep_alive_interval = 60;
     int max_inflight = 65535;
+
+    // LWT 설정
+    bool lwt_enabled = false;
+    std::string lwt_topic;
+    std::string lwt_payload;
+    int lwt_qos = 1;
+    bool lwt_retain = true;
 };
 
 class MqttClient : public virtual mqtt::callback,

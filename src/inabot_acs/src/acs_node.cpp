@@ -14,8 +14,16 @@ AcsNode::AcsNode()
     this->declare_parameter<bool>("tls_enabled", false);
 
     // Heartbeat / AGV 식별 관련 파라미터
+    this->declare_parameter<int>("heartbeat_interval", 15);
     this->declare_parameter<std::string>("manufacturer", "Inatech");  // 기본값 임시
     this->declare_parameter<std::string>("serial_number", "P3LDD02"); // 기본값 임시
+
+    // LWT 관련 파라미터
+    this->declare_parameter<bool>("lwt_enabled", true);
+    this->declare_parameter<std::string>("lwt_topic", "");
+    this->declare_parameter<std::string>("lwt_payload", "");
+    this->declare_parameter<int>("lwt_qos", 1);
+    this->declare_parameter<bool>("lwt_retain", true);
 }
 
 AcsNode::~AcsNode()
@@ -46,10 +54,18 @@ void AcsNode::init()
     client_cfg.keep_alive_interval = get_parameter("keep_alive_interval").as_int();
     client_cfg.max_inflight = get_parameter("max_inflight").as_int();
 
+    //LWT
+    client_cfg.lwt_enabled = get_parameter("lwt_enabled").as_bool();
+    client_cfg.lwt_topic = get_parameter("lwt_topic").as_string();
+    client_cfg.lwt_payload = get_parameter("lwt_payload").as_string();
+    client_cfg.lwt_qos = get_parameter("lwt_qos").as_int();
+    client_cfg.lwt_retain = get_parameter("lwt_retain").as_bool();
+    
     // MQTT Client 생성
     mqtt_client_ = std::make_shared<MqttClient>(broker_cfg, client_cfg, msg_handler_);
 
    // Heartbeat Manager 생성
+    int heartbeat_interval = get_parameter("heartbeat_interval").as_int();  // Heartbeat 주기
     std::string manufacturer = get_parameter("manufacturer").as_string();
     std::string serial_number = get_parameter("serial_number").as_string();
 
@@ -59,8 +75,7 @@ void AcsNode::init()
         [this](const std::string& topic, const std::string& payload) {
             if (mqtt_client_) mqtt_client_->publish(topic, payload);
         },
-
-        client_cfg.keep_alive_interval   // heartbeat interval
+        heartbeat_interval   // Heartbeat 주기
     );
 
     heartbeat_manager_->start();

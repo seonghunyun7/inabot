@@ -225,6 +225,43 @@ AGV가 정상 종료 시 → "OFFLINE" 상태 발행 후 disconnect
 QoS = 1 (At least once)
 ROS2 노드 내부에서 주기적 메시지 발행은 필요 없음 (MQTT keepalive 활용)
 
+| 구분        | 사용 용도                  | 시각 포함 여부    |
+| --------- | ---------------------- | ----------- |
+| LWT       | 예기치 않은 연결 종료 시 브로커가 발행 | 고정값, 실시간 아님 |
+| Heartbeat | 주기적 상태 모니터링            | 현재 시각 포함 가능 |
+
+[Robot] ---> (MQTT CONNECT) ---> [Broker]
+   |                               |
+   |                               |
+   |-------> 비정상 종료 ---------> LWT 발행 ----> (Subscribed clients, 예: FMS)
+
+
+로봇이 끊긴 순간 브로커가 LWT 토픽으로 "OFFLINE" 메시지 발행
+구독하고 있는 FMS나 다른 클라이언트가 메시지를 받음
+
+=> LWT 메시지는 로봇이 직접 보내는 것이 아니라, 브로커가 로봇 연결이 비정상적으로 끊겼을 때 설정된 토픽으로 발행
+
+1. Mosquitto (터미널 0)
+sudo systemctl start mosquitto
+
+2. LWT (터미널 1)
+mosquitto_sub -h localhost -t "uagv/v2/Inatech/P3LDD02/connection" -v
+
+3. ros2 launch inabot_acs robot_acs_launch.py (터미널 3); LWT 설정 포함 (lwt_enabled=True, lwt_topic=..., lwt_payload=...)
+
+4. 노드 강제 종료 (터미널 3)
+ps aux | grep robot_acs_node
+kill -9 17835
+
+(1) 프로세스 강제 종료
+kill -9 <pid>로 노드 강제 종료
+LWT 메시지 확인 : 미널 1에서 LWT 메시지가 자동으로 출력되는지 확인
+
+네트워크 끊기
+로컬 환경에서 브로커와 클라이언트 연결을 끊어도 가능
+sudo ifconfig lo down   # 로컬 연결 끊기
+sudo ifconfig lo up     # 복구
+
 -------------------------------------------------------------------------
 
 . vd5050d order(topic) => drop
