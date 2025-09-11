@@ -468,3 +468,33 @@ ysh@ysh-ThinkPad-T16-Gen-4:~/inabot_ws$ ps aux | grep robot_acs_node
 ysh        29798  0.0  0.0  10844  2560 pts/1    R+   17:12   0:00 grep --color=auto robot_acs_node
 
 kill <PID>
+
+
+--
+
+    1. Heartbeat 개념 구분
+        ◦ 브로커 차원의 heartbeat는 MQTT 표준 keepalive 메커니즘에 의해 관리됩니다.
+클라이언트가 정해진 주기 내에 패킷을 송신하지 않으면 브로커가 연결이 끊어진 것으로 간주하고, 설정된 LWT(Last Will & Testament) 메시지를 발행합니다.
+        ◦ 반면, VDA5050 사양의 heartbeat 메시지는 애플리케이션 레벨에서 AGV가 주기적으로 state 메시지를 publish하도록 정의한 것입니다.
+이를 통해 FMS는 단순 네트워크 연결 상태뿐 아니라, AGV가 정상적으로 동작하고 있음을 주기적으로 확인할 수 있습니다.
+        ◦ 따라서 두 메커니즘은 상호 보완적으로 동작하며,
+            ▪ 브로커 keepalive/LWT는 네트워크 연결 상태를 보장하고,
+            ▪ VDA5050 heartbeat는 애플리케이션 레벨의 AGV 생존 상태를 보장합니다.
+    2. Docker 환경 vs Mosquitto 브로커 환경
+        ◦ 기본적으로 동일한 MQTT 표준을 따르므로 heartbeat 동작 자체에는 차이가 없습니다.
+        ◦ 다만 Docker 환경에서는 컨테이너 네트워크 설정과 리소스 제한이 변수로 작용할 수 있고,
+Mosquitto 단독 환경에서는 OS 네트워크 설정, 브로커 파라미터(keepalive, max_inflight_messages 등)에 영향을 받을 수 있습니다.
+    3. 현장 대응 가이드 (예정)
+        ◦ P4H 현장에서 대응 인원들이 직접 확인할 수 있도록, 다음 절차를 권장합니다.
+            ▪ MQTT 모니터링 툴(예: mosquitto_sub, MQTT Explorer)로 heartbeat/state 토픽 구독
+            ▪ 정해진 주기(예: 15초 이내)로 메시지가 수신되는지 확인
+            ▪ 연결 해제 시 LWT 토픽(connection)이 CONNECTIONBROKEN으로 변하는지 확인
+        ◦ 이를 기반으로 내부 대응 매뉴얼을 준비할 예정입니다.
+    4. P3D 운영 구간 통신 불안정
+        ◦ 네트워크 품질 문제(와이파이 핸드오버, AP 로밍 지연 등)로 간헐적 끊김이 발생할 수 있습니다.
+        ◦ 대응 방안으로는 브로커 keepalive 최적화, QoS=1 설정, 재연결 파라미터 조정, 네트워크 로밍 최적화 등을 고려하실 수 있으며, 필요 시 저희 설정값을 공유드릴 수 있습니다.
+
+정리
+    • 브로커 heartbeat: MQTT 표준 keepalive/LWT → 네트워크 연결 상태 확인
+    • VDA5050 heartbeat: AGV state 주기적 publish → 애플리케이션 레벨 상태 확인
+    • 두 메커니즘을 함께 사용해야 안정적인 FMS–AGV 통신 상태 보장이 가능합니다.

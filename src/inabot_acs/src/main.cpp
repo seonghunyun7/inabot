@@ -26,7 +26,6 @@ void logStackTrace(int sig)
     std::cout << "\033[1m\033[33m" << oss.str() << "\033[0m";
 }
 
-
 void signalhandler(int sig)
 {
     // MQTT 종료

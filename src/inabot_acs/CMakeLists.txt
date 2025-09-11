@@ -18,7 +18,6 @@ find_library(PahoMqttCpp_LIBRARY NAMES libpaho-mqttpp3.so REQUIRED)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
@@ -27,6 +26,16 @@ find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(fmt REQUIRED)
 find_package(nlohmann_json REQUIRED)  # JSON 라이브러리
+find_package(Boost REQUIRED COMPONENTS
+  log
+  log_setup
+  thread
+  filesystem
+  date_time
+  system
+  stacktrace_backtrace
+  regex
+)
 
 ## Include directories
 include_directories(
@@ -51,6 +60,13 @@ target_link_libraries(robot_acs_node
   ${PahoMqttC_LIBRARY}
   ${PahoMqttCpp_LIBRARY}
   ${fmt_LIBRARIES}
+  Boost::log
+  Boost::log_setup
+  Boost::thread
+  Boost::system
+  Boost::filesystem
+  Boost::date_time
+  Boost::stacktrace_backtrace
 )
 
 ## Add dependencies
