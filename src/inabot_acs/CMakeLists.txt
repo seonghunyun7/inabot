@@ -41,6 +41,7 @@ include_directories(
 add_executable(robot_acs_node
   src/main.cpp
   src/acs_node.cpp
+  src/heartbeat_manager.cpp
   src/mqtt_client.cpp
   src/message_handler.cpp
   src/mission_manager.cpp

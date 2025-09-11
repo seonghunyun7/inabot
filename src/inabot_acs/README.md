@@ -171,9 +171,9 @@ sudo ufw allow 1883
 sudo ufw status
  
 
+## VDA5050 프로토콜 2.0 기준의 MQTT 토픽 구조이고, FMS 서버(혹은 Master Control PC)와 AGV 간의 통신 방향
 
-VDA5050+사양서.doc
-| 토픽                 | 설명                 |
+| Subtopic                 | 설명                 |
 | ------------------ | ------------------ |
 | `"order"`          | AGV가 수행할 작업 지시 메시지 |
 | `"instantActions"` | 즉시 실행해야 하는 액션 명령   |
@@ -182,7 +182,52 @@ VDA5050+사양서.doc
 | `"connection"`     | 연결 정보              |
 | `"factsheet"`      | 시스템 정보             |
 
-. vd5050d order(topic) > drop
+
+| Subtopic           | Published by   | Subscribed by         | 방향                  | 용도                  | Schema                  |
+| ------------------ | -------------- | --------------------- | ------------------- | ------------------- | ----------------------- |
+| **order**          | Master Control | AGV                   | PC → AGV            | 주행 명령 전송            | `order.schema`          |
+| **instantActions** | Master Control | AGV                   | PC → AGV            | 즉시 수행할 동작 전송        | `instantActions.schema` |
+| **state**          | AGV            | Master Control        | AGV → PC            | AGV 상태 통신           | `state.schema`          |
+| **visualization**  | AGV            | Visualization Systems | AGV → Visualization | 고빈도 위치 정보, 시각화용     | `visualization.schema`  |
+| **connection**     | Broker/AGV     | Master Control        | AGV → PC            | 연결 상태 표시              | `connection.schema`     |
+| **factsheet**      | AGV            | Master Control        | AGV → PC            | AGV 초기 설정 정보 전달     | `factsheet.schema`      |
+
+
+6.14 Topic "connection"
+During the connection of an AGV client to the broker, a last will topic and message can be
+set, which is published by the broker upon disconnection of the AGV client from the broker.
+Thus, the master control can detect a disconnection event by subscribing the connection
+topics of all AGV. 
+
+// VDA5050 2.0 표준에서 AGV와 MQTT 브로커 간의 연결 상태를 주기적으로 확인하고 관리하는 방식이 정의
+
+The disconnection is detected via a ""heartbeat"" that is exchanged between
+the broker and the client. The interval is configurable in most brokers and should be set
+around 15 seconds. The Quality of Service level for the connection topic shall be 1 - At
+Least Once.
+The suggested last will topic structure is:
+uagv/v2/manufacturer/SN/connection
+
+==> MQTT Last Will & Testament (LWT) 기능 활용
+AGV가 예기치 않게 연결이 끊겼을 때 브로커가 자동으로 "connection" 토픽에 상태 메시지를 발행
+하비트 역할
+브로커와 클라이언트 간의 연결이 살아 있는지 확인
+대부분 브로커에서 하비트 간격(keepalive interval) 설정 가능 (권장 15초)
+AGV → 브로커, 브로커 → Master Control 간 연결 모니터링
+ ==> VDA5050 2.0 표준에서는 connection 토픽이 하비트(heartbeat)의 역할을 수행하며, 
+    AGV는 주기적인 publish 대신 MQTT keepalive와 LWT를 활용
+
+## 
+AGV가 MQTT 브로커에 연결될 때 Last Will를 설정 → 연결 끊기 시 브로커가 자동으로 CONNECTIONBROKEN 발행
+AGV가 정상 종료 시 → "OFFLINE" 상태 발행 후 disconnect
+연결 중 → "ONLINE" 상태 발행
+메시지는 retained flag 설정 → 최신 상태 유지
+QoS = 1 (At least once)
+ROS2 노드 내부에서 주기적 메시지 발행은 필요 없음 (MQTT keepalive 활용)
+
+-------------------------------------------------------------------------
+
+. vd5050d order(topic) => drop
 
 mosquitto_pub -h localhost -p 1883 -t "order" -m '{
   "headerId": 8669,
@@ -236,10 +281,61 @@ mosquitto_pub -h localhost -p 1883 -t "order" -m '{
   ]
 }'
 
+# . vd5050d order(topic) => move 
+mosquitto_pub -h localhost -p 1883 -t "order" -m '{
+  "headerId": 8096,
+  "timestamp": "2025-06-30T04:52:11.39Z",
+  "version": "2.0.0",
+  "manufacturer": "Inatech",
+  "serialNumber": "P3LDD02",
+  "orderId": "ACS-1000122678",
+  "orderUpdateId": 0,
+  "zoneSetId": "",
+  "nodes": [
+    {
+      "nodeId": "10002",
+      "sequenceId": 0,
+      "released": true,
+      "nodeDescription": "",
+      "nodePosition": {
+        "x": 221.33,
+        "y": -44.428,
+        "mapId": "P3",
+        "allowedDeviationXY": 0.5
+      },
+      "actions": []
+    },
+    {
+      "nodeId": "89",
+      "sequenceId": 2,
+      "released": true,
+      "nodeDescription": "",
+      "nodePosition": {
+        "x": 222.7,
+        "y": -44.428,
+        "mapId": "P3",
+        "allowedDeviationXY": 0.2
+      },
+      "actions": []
+    }
+  ],
+  "edges": [
+    {
+      "edgeId": "10002_89",
+      "sequenceId": 1,
+      "released": true,
+      "startNodeId": "10002",
+      "endNodeId": "89",
+      "maxSpeed": 0.05,
+      "orientation": 3.141592653589793,
+      "rotationAllowed": false,
+      "actions": []
+    }
+  ]
+}'
+
 
 ## for_test
-
-
 a. heartbeat 보내기
 
 mosquitto_pub -h localhost -p 1883 -t "heartbeat" -m '{

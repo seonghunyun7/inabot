@@ -12,12 +12,18 @@ AcsNode::AcsNode()
     this->declare_parameter<int>("keep_alive_interval", 60);
     this->declare_parameter<int>("max_inflight", 65535);
     this->declare_parameter<bool>("tls_enabled", false);
+
+    // Heartbeat / AGV 식별 관련 파라미터
+    this->declare_parameter<std::string>("manufacturer", "Inatech");  // 기본값 임시
+    this->declare_parameter<std::string>("serial_number", "P3LDD02"); // 기본값 임시
 }
 
 AcsNode::~AcsNode()
 {
     if (mqtt_client_) mqtt_client_->disconnect();
     // smart pointer 사용 중이므로 mission_manager_는 자동 해제
+
+    if (heartbeat_manager_) heartbeat_manager_->stop(); // OFFLINE 전송
 }
 
 void AcsNode::init()
@@ -43,5 +49,38 @@ void AcsNode::init()
     // MQTT Client 생성
     mqtt_client_ = std::make_shared<MqttClient>(broker_cfg, client_cfg, msg_handler_);
 
+   // Heartbeat Manager 생성
+    std::string manufacturer = get_parameter("manufacturer").as_string();
+    std::string serial_number = get_parameter("serial_number").as_string();
+
+    heartbeat_manager_ = std::make_shared<HeartbeatManager>(
+        manufacturer,
+        serial_number,
+        [this](const std::string& topic, const std::string& payload) {
+            if (mqtt_client_) mqtt_client_->publish(topic, payload);
+        },
+
+        client_cfg.keep_alive_interval   // heartbeat interval
+    );
+
+    heartbeat_manager_->start();
+
     std::cout << "[INFO] Robot ACS Node initialized." << std::endl;
+}
+
+void AcsNode::shutdownMqtt()
+{
+    // OFFLINE 전송
+    if (heartbeat_manager_)  {
+        heartbeat_manager_->stop();
+        std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    }
+
+    if (mqtt_client_) {
+        try {
+            mqtt_client_->disconnect();
+        } catch (const std::exception &e) {
+            std::cerr << "[AcsNode] MQTT disconnect error: " << e.what() << std::endl;
+        }
+    }
 }

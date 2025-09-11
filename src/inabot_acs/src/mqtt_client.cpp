@@ -84,7 +84,7 @@ MqttClient::MqttClient(const BrokerConfig& broker_cfg,
 
 MqttClient::~MqttClient()
 {
-    try { client_->disconnect(); } catch (...) {}
+    try { if (client_ && client_->is_connected()) client_->disconnect(); } catch (...) {}
 }
 
 void MqttClient::disconnect()

@@ -9,14 +9,18 @@ def generate_launch_description():
             name='robot_acs_node',
             output='screen',
             parameters=[
-                {'broker_host': 'localhost',  # 브로커 호스트  # localhost # 192.168.0.10  as the broker address
-                'broker_port': 1883,         # 브로커 포트
-                'client_id': 'fms_client',
-                'clean_session': True,       # 클린 세션 여부
-                'keep_alive_interval': 60, # Keep-alive 간격 (초)
-                'max_inflight': 65535,       # 최대 inflight 메시지 수
-                'tls_enabled': False}        # TLS(SSL) 연결 사용 여부
-                ],
+                {
+                    'broker_host': 'localhost',
+                    'broker_port': 1883,
+                    'client_id': 'fms_client',
+                    'clean_session': True,
+                    'keep_alive_interval': 15,
+                    'max_inflight': 65535,
+                    'tls_enabled': False,
+                    'manufacturer': 'Inatech',      # 임시 값
+                    'serial_number': 'P3LDD02'      # 임시 값
+                }
+            ],
             remappings=[
                 # 예: ('/input_topic', '/robot/input_topic')
             ]
