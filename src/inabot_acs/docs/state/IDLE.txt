@@ -1,0 +1,110 @@
+{
+    "headerId": 11896,
+    "timestamp": "2025-06-30T12:54:48.973Z",
+    "version": "2.0.0",
+    "manufacturer": "Inatech",
+    "serialNumber": "P3LDD02",
+    "orderId": "ACS-1000122678",
+    "orderUpdateId": 0,
+    "driving": false,
+    "paused": false,
+    "newBaseRequest": false,
+    "distanceSinceLastNode": 0,
+    "QR": "",
+    "operatingMode": "MANUAL",
+    "lastNodeId": "10002",
+    "lastNodeSequenceId": 0,
+    "nodeStates": [{
+            "nodeId": "10002",
+            "sequenceId": 0,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 221.33,
+                "y": -44.428,
+                "theta": 0,
+                "mapId": "P3"
+            },
+            "released": true
+        }, {
+            "nodeId": "89",
+            "sequenceId": 2,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 222.7,
+                "y": -44.428,
+                "theta": 0,
+                "mapId": "P3"
+            },
+            "released": true
+        }
+    ],
+    "edgeStates": [{
+            "edgeId": "10002_89",
+            "sequenceId": 1,
+            "released": true
+        }
+    ],
+    "LoadFactor": {
+        "Front_Traction": 16,
+        "Front_Steer": 3,
+        "Rear_Traction": 27,
+        "Rear_Steer": 5
+    },
+    "agvPosition": {
+        "positionInitialized": true,
+        "localizationScore": 1,
+        "deviationRange": 0,
+        "x": 265.194396972656,
+        "y": 2.88258290290833,
+        "theta": -0.0076024578884244,
+        "mapId": "",
+        "mapDescription": ""
+    },
+    "velocity": {
+        "vx": 0.489341884851456,
+        "vy": -0.848814129829407,
+        "omega": 0
+    },
+    "loads": [],
+    "actionStates": [],
+    "batteryState": {
+        "batteryCharge": 65.6,
+        "batteryVoltage": 52.3,
+        "batteryHealth": 10,
+        "charging": false,
+        "HardWareVer": 11,
+        "FirmwareVer": 14,
+        "PackTotalCap": 540,
+        "PackRemCap": 354,
+        "CycleCount": 74,
+        "BatteryStatus": 1,
+        "ProtectionFlag": 0,
+        "WarningFlag": 0,
+        "batteryAmps": -7,
+        "CellTemp_1": 28.8,
+        "CellTemp_2": 27.9,
+        "CellVolt_1": 325.1,
+        "CellVolt_2": 327.8,
+        "CellVolt_3": 326.9,
+        "CellVolt_4": 326.8,
+        "CellVolt_5": 327.8,
+        "CellVolt_6": 328,
+        "CellVolt_7": 327.6,
+        "CellVolt_8": 327.8,
+        "CellVolt_9": 327.9,
+        "CellVolt_10": 327.8,
+        "CellVolt_11": 327.9,
+        "CellVolt_12": 327.9,
+        "CellVolt_13": 327.8,
+        "CellVolt_14": 327.7,
+        "CellVolt_15": 327.8,
+        "CellVolt_16": 327.8,
+        "reach": 0
+    },
+    "errors": [],
+    "information": [],
+    "safetyState": {
+        "eStop": "AUTOACK",
+        "fieldViolation": false
+    }
+}

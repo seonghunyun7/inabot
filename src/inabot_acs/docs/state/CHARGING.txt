@@ -1,0 +1,88 @@
+{
+    "headerId": 11720,
+    "timestamp": "2025-06-30T12:51:48.810Z",
+    "version": "2.0.0",
+    "manufacturer": "Inatech",
+    "serialNumber": "P3LDD02",
+    "orderId": "ACS-1000122675",
+    "orderUpdateId": 18,
+    "driving": false,
+    "paused": false,
+    "newBaseRequest": false,
+    "distanceSinceLastNode": 0,
+    "QR": "",
+    "operatingMode": "AUTOMATIC",
+    "lastNodeId": "10002",
+    "lastNodeSequenceId": 54,
+    "nodeStates": [],
+    "edgeStates": [],
+    "LoadFactor": {
+        "Front_Traction": 0,
+        "Front_Steer": 0,
+        "Rear_Traction": 0,
+        "Rear_Steer": 0
+    },
+    "agvPosition": {
+        "positionInitialized": true,
+        "localizationScore": 1,
+        "deviationRange": 0,
+        "x": 221.289108276367,
+        "y": -44.3882446289062,
+        "theta": -3.13039755821228,
+        "mapId": "",
+        "mapDescription": ""
+    },
+    "velocity": {
+        "vx": -0,
+        "vy": -0,
+        "omega": 0
+    },
+    "loads": [],
+    "actionStates": [{
+            "actionId": "d45172d3-b8a9-4b60-a0c9-26d426296352",
+            "actionType": "stopCharging",
+            "actionDescription": "Deactivates the charging process to send a new order. The charging process can also be interrupted by the vehicle / charging station e.g. if the battery is full. Battery state is only allowed to be \"false\" when AGV is ready to receive orders.",
+            "actionStatus": "FINISHED"
+        }
+    ],
+    "batteryState": {
+        "batteryCharge": 66,
+        "batteryVoltage": 53.7,
+        "batteryHealth": 10,
+        "charging": true,
+        "HardWareVer": 11,
+        "FirmwareVer": 14,
+        "PackTotalCap": 540,
+        "PackRemCap": 356,
+        "CycleCount": 74,
+        "BatteryStatus": 2,
+        "ProtectionFlag": 0,
+        "WarningFlag": 0,
+        "batteryAmps": 5.3,
+        "CellTemp_1": 28.7,
+        "CellTemp_2": 27.9,
+        "CellVolt_1": 338,
+        "CellVolt_2": 336,
+        "CellVolt_3": 336.4,
+        "CellVolt_4": 336.5,
+        "CellVolt_5": 335.7,
+        "CellVolt_6": 336.6,
+        "CellVolt_7": 335.7,
+        "CellVolt_8": 335.5,
+        "CellVolt_9": 335.6,
+        "CellVolt_10": 335.5,
+        "CellVolt_11": 335.9,
+        "CellVolt_12": 335.5,
+        "CellVolt_13": 335.5,
+        "CellVolt_14": 335.4,
+        "CellVolt_15": 335.7,
+        "CellVolt_16": 335.9,
+        "reach": 0
+    },
+    "errors": [],
+    "information": [],
+    "safetyState": {
+        "eStop": "AUTOACK",
+        "fieldViolation": false
+    }
+}

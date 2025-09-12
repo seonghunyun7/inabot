@@ -1,0 +1,100 @@
+MOVING
+{
+    "headerId": 5834,
+    "timestamp": "2025-06-23T16:52:54.844Z",
+    "version": "2.0.0",
+    "manufacturer": "Inatech",
+    "serialNumber": "P3LDD02",
+    "orderId": "ACS-1000122533",
+    "orderUpdateId": 1,
+    "driving": false,
+    "paused": false,
+    "newBaseRequest": false,
+    "distanceSinceLastNode": 0,
+    "QR": "",
+    "operatingMode": "AUTOMATIC",
+    "lastNodeId": "10121",
+    "lastNodeSequenceId": 6,
+    "nodeStates": [{
+            "nodeId": "10111",
+            "sequenceId": 8,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 297.723,
+                "y": 5.402,
+                "theta": 0,
+                "mapId": "P3"
+            },
+            "released": true
+        }
+    ],
+    "edgeStates": [{
+            "edgeId": "10121_10111",
+            "sequenceId": 7,
+            "released": true
+        }
+    ],
+    "LoadFactor": {
+        "Front_Traction": 2,
+        "Front_Steer": 12,
+        "Rear_Traction": 1,
+        "Rear_Steer": 13
+    },
+    "agvPosition": {
+        "positionInitialized": true,
+        "localizationScore": 1,
+        "deviationRange": 0,
+        "x": 297.713073730469,
+        "y": 6.97085332870483,
+        "theta": -3.13170170783997,
+        "mapId": "",
+        "mapDescription": ""
+    },
+    "velocity": {
+        "vx": -0,
+        "vy": -0,
+        "omega": 0
+    },
+    "loads": [],
+    "actionStates": [],
+    "batteryState": {
+        "batteryCharge": 35.7,
+        "batteryVoltage": 50.8,
+        "batteryHealth": 10,
+        "charging": false,
+        "HardWareVer": 11,
+        "FirmwareVer": 14,
+        "PackTotalCap": 540,
+        "PackRemCap": 192,
+        "CycleCount": 71,
+        "BatteryStatus": 1,
+        "ProtectionFlag": 0,
+        "WarningFlag": 0,
+        "batteryAmps": -4.8,
+        "CellTemp_1": 28.6,
+        "CellTemp_2": 28.4,
+        "CellVolt_1": 316.3,
+        "CellVolt_2": 318.3,
+        "CellVolt_3": 317.3,
+        "CellVolt_4": 317.5,
+        "CellVolt_5": 317.5,
+        "CellVolt_6": 316.7,
+        "CellVolt_7": 317.2,
+        "CellVolt_8": 317.6,
+        "CellVolt_9": 318,
+        "CellVolt_10": 318.1,
+        "CellVolt_11": 317.8,
+        "CellVolt_12": 317.9,
+        "CellVolt_13": 318.2,
+        "CellVolt_14": 317.7,
+        "CellVolt_15": 317.6,
+        "CellVolt_16": 316.7,
+        "reach": 0
+    },
+    "errors": [],
+    "information": [],
+    "safetyState": {
+        "eStop": "AUTOACK",
+        "fieldViolation": false
+    }
+}

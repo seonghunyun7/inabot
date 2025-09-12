@@ -1,0 +1,135 @@
+LOADING
+{
+    "headerId": 5887,
+    "timestamp": "2025-06-23T16:53:40.50Z",
+    "version": "2.0.0",
+    "manufacturer": "Inatech",
+    "serialNumber": "P3LDD02",
+    "orderId": "ACS-1000122535",
+    "orderUpdateId": 0,
+    "driving": true,
+    "paused": false,
+    "newBaseRequest": false,
+    "distanceSinceLastNode": 0,
+    "QR": "SP3ECLV001\r",
+    "operatingMode": "AUTOMATIC",
+    "lastNodeId": "10113",
+    "lastNodeSequenceId": 2,
+    "nodeStates": [{
+            "nodeId": "10112",
+            "sequenceId": 0,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 298.111,
+                "y": 5.402,
+                "theta": 0,
+                "mapId": "P3"
+            },
+            "released": true
+        }, {
+            "nodeId": "10113",
+            "sequenceId": 2,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 298.5,
+                "y": 5.402,
+                "theta": 0,
+                "mapId": "P3"
+            },
+            "released": true
+        }, {
+            "nodeId": "10114",
+            "sequenceId": 4,
+            "nodeDescription": "",
+            "nodePosition": {
+                "x": 300,
+                "y": 5.402,
+                "theta": 0,
+                "mapId": "P3"
+            },
+            "released": true
+        }
+    ],
+    "edgeStates": [{
+            "edgeId": "10112_10113",
+            "sequenceId": 1,
+            "released": true
+        }, {
+            "edgeId": "10113_10114",
+            "sequenceId": 3,
+            "released": true
+        }
+    ],
+    "LoadFactor": {
+        "Front_Traction": 6,
+        "Front_Steer": 10,
+        "Rear_Traction": 5,
+        "Rear_Steer": 3
+    },
+    "agvPosition": {
+        "positionInitialized": true,
+        "localizationScore": 1,
+        "deviationRange": 0,
+        "x": 298.326721191406,
+        "y": 5.38703918457031,
+        "theta": -3.12417340278625,
+        "mapId": "",
+        "mapDescription": ""
+    },
+    "velocity": {
+        "vx": -0.00089868635404855,
+        "vy": 0.0021780279930681,
+        "omega": 0
+    },
+    "loads": [],
+    "actionStates": [{
+            "actionId": "detect",
+            "actionType": "detectObject",
+            "actionStatus": "RUNNING"
+        }, {
+            "actionId": "pick",
+            "actionType": "pick",
+            "actionStatus": "WAITING"
+        }
+    ],
+    "batteryState": {
+        "batteryCharge": 35.6,
+        "batteryVoltage": 50.8,
+        "batteryHealth": 10,
+        "charging": false,
+        "HardWareVer": 11,
+        "FirmwareVer": 14,
+        "PackTotalCap": 540,
+        "PackRemCap": 192,
+        "CycleCount": 71,
+        "BatteryStatus": 1,
+        "ProtectionFlag": 0,
+        "WarningFlag": 0,
+        "batteryAmps": -5.5,
+        "CellTemp_1": 28.6,
+        "CellTemp_2": 28.4,
+        "CellVolt_1": 316.5,
+        "CellVolt_2": 318.3,
+        "CellVolt_3": 317.3,
+        "CellVolt_4": 317.5,
+        "CellVolt_5": 317.6,
+        "CellVolt_6": 317,
+        "CellVolt_7": 317.3,
+        "CellVolt_8": 317.4,
+        "CellVolt_9": 317.8,
+        "CellVolt_10": 317.9,
+        "CellVolt_11": 317.7,
+        "CellVolt_12": 317.8,
+        "CellVolt_13": 318.1,
+        "CellVolt_14": 317.6,
+        "CellVolt_15": 317.5,
+        "CellVolt_16": 316.5,
+        "reach": 0
+    },
+    "errors": [],
+    "information": [],
+    "safetyState": {
+        "eStop": "AUTOACK",
+        "fieldViolation": false
+    }
+}

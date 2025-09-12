@@ -143,44 +143,128 @@ void MessageSender::rosCallback(const std::string& mqtt_topic,
         j["manufacturer"] = manufacturer_;
         j["serialNumber"] = serial_number_;
 
-        // AGV 위치/속도/적재/동작 상태 예제
-        j["agvPosition"] = {
-            {"positionInitialized", true},
-            {"x", 12.34},
-            {"y", 56.78},
-            {"theta", 1.57},
-            {"mapId", "map01"},
-            {"mapDescription", "Main floor"}
-        };
+        std::string state = msg->data.empty() ? "NONE" : msg->data;
 
-        j["velocity"] = {
-            {"vx", 0.5},
-            {"vy", 0.0},
-            {"omega", 0.1}
-        };
-
-        j["loads"] = json::array({
-            {{"loadId", "LOAD001"}, {"loadType", "PALLET"}, {"loadPosition", "front"},
-            {"boundingBoxReference", {{"x",0.0},{"y",0.0},{"z",0.0},{"theta",0.0}}},
-            {"loadDimensions", {{"length",1.2},{"width",0.8},{"height",0.5},{"weight",300.0}}}}
-        });
-
-        j["driving"] = true;
-        j["paused"] = false;
+        // 기본 필드
         j["newBaseRequest"] = false;
-        j["distanceSinceLastNode"] = 2.5;
+        j["distanceSinceLastNode"] = 0;
+        j["operatingMode"] = (state == "IDLE") ? "MANUAL" : "AUTOMATIC";
+        j["QR"] = "";
 
+        // 상태별 driving, paused, actionStates, batteryState 등
+        if (state == "MOVING") {
+            j["driving"] = true;
+            j["paused"] = false;
+            j["actionStates"] = json::array(); // 이동 중 특별 액션 없음
+
+            j["agvPosition"] = {
+                {"positionInitialized", true},
+                {"localizationScore", 1},
+                {"deviationRange", 0},
+                {"x", 297.713073730469},
+                {"y", 6.97085332870483},
+                {"theta", -3.13170170783997},
+                {"mapId", ""},
+                {"mapDescription", ""}
+            };
+
+            j["velocity"] = { {"vx", -0.0}, {"vy", -0.0}, {"omega", 0.0} };
+
+            j["batteryState"] = {
+                {"batteryCharge", 35.7},
+                {"batteryVoltage", 50.8},
+                {"charging", false}
+            };
+
+        } else if (state == "IDLE") {
+            j["driving"] = false;
+            j["paused"] = false;
+            j["actionStates"] = json::array();
+
+            j["agvPosition"] = {
+                {"positionInitialized", true},
+                {"localizationScore", 1},
+                {"deviationRange", 0},
+                {"x", 265.194396972656},
+                {"y", 2.88258290290833},
+                {"theta", -0.0076024578884244},
+                {"mapId", ""},
+                {"mapDescription", ""}
+            };
+
+            j["velocity"] = { {"vx", 0.489341884851456}, {"vy", -0.848814129829407}, {"omega", 0.0} };
+
+            j["batteryState"] = {
+                {"batteryCharge", 65.6},
+                {"batteryVoltage", 52.3},
+                {"charging", false}
+            };
+
+        } else if (state == "CHARGING") {
+            j["driving"] = false;
+            j["paused"] = false;
+            j["actionStates"] = {
+                {{"actionId", "stopCharging"},
+                {"actionType", "stopCharging"},
+                {"actionStatus", "FINISHED"}}
+            };
+
+            j["agvPosition"] = {
+                {"positionInitialized", true},
+                {"localizationScore", 1},
+                {"deviationRange", 0},
+                {"x", 221.289108276367},
+                {"y", -44.3882446289062},
+                {"theta", -3.13039755821228},
+                {"mapId", ""},
+                {"mapDescription", ""}
+            };
+
+            j["velocity"] = { {"vx", 0.0}, {"vy", 0.0}, {"omega", 0.0} };
+
+            j["batteryState"] = {
+                {"batteryCharge", 66.0},
+                {"batteryVoltage", 53.7},
+                {"charging", true}
+            };
+
+        } else if (state == "LOADING") {
+            j["driving"] = true;
+            j["paused"] = false;
+            j["actionStates"] = {
+                {{"actionId", "detect"}, {"actionType", "detectObject"}, {"actionStatus", "RUNNING"}},
+                {{"actionId", "pick"}, {"actionType", "pick"}, {"actionStatus", "WAITING"}}
+            };
+
+            j["agvPosition"] = {
+                {"positionInitialized", true},
+                {"localizationScore", 1},
+                {"deviationRange", 0},
+                {"x", 298.326721191406},
+                {"y", 5.38703918457031},
+                {"theta", -3.12417340278625},
+                {"mapId", ""},
+                {"mapDescription", ""}
+            };
+
+            j["velocity"] = { {"vx", -0.00089868635404855}, {"vy", 0.0021780279930681}, {"omega", 0.0} };
+
+            j["batteryState"] = {
+                {"batteryCharge", 35.6},
+                {"batteryVoltage", 50.8},
+                {"charging", false}
+            };
+        }
+
+        // 공통 필드
         j["nodeStates"] = json::array();
         j["edgeStates"] = json::array();
-        j["actionStates"] = json::array();
-        j["operatingMode"] = "AUTOMATIC";
+        j["LoadFactor"] = { {"Front_Traction", 0}, {"Front_Steer", 0}, {"Rear_Traction", 0}, {"Rear_Steer", 0} };
         j["errors"] = json::array();
         j["information"] = json::array();
-        j["safetyState"] = {{"emergencyStopAcknowledged", "AUTOACK"}, {"protectiveFieldViolated", false}};
-        j["batteryState"] = {{"batteryCharge", 85.0}, {"batteryVoltage", 24.5}, {"batteryHealth", 80}, {"charging", false}, {"reach", 10}};
+        j["safetyState"] = { {"eStop", "AUTOACK"}, {"fieldViolation", false} };
 
         payload = j.dump();
-
     } else {
         payload = msg->data;
     }
