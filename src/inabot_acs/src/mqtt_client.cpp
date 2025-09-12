@@ -13,7 +13,6 @@ MqttClient::MqttClient(const BrokerConfig& broker_cfg,
     std::cout << "[DEBUG] Broker Port: " << broker_cfg.port << std::endl;
     std::cout << "[DEBUG] TLS Enabled: " << (broker_cfg.tls.enabled ? "true" : "false") << std::endl;
     std::cout << "[DEBUG] User: " << (broker_cfg.user.empty() ? "<empty>" : broker_cfg.user) << std::endl;
-
     std::cout << "[DEBUG] Client ID: " << client_cfg.id << std::endl;
     std::cout << "[DEBUG] Clean Session: " << (client_cfg.clean_session ? "true" : "false") << std::endl;
     std::cout << "[DEBUG] Keep Alive: " << client_cfg.keep_alive_interval << std::endl;
@@ -31,6 +30,17 @@ MqttClient::MqttClient(const BrokerConfig& broker_cfg,
     conn_opts_.set_max_inflight(client_cfg.max_inflight);
     conn_opts_.set_automatic_reconnect(true);
 
+    // LWT 설정
+    if (client_cfg.lwt_enabled) {
+        mqtt::message will_msg(
+            client_cfg.lwt_topic,     // 설정한 토픽
+            client_cfg.lwt_payload,   // 설정한 페이로드
+            client_cfg.lwt_qos,       // 설정한 QoS
+            client_cfg.lwt_retain     // 설정한 Retain
+        );
+        conn_opts_.set_will(will_msg);
+    }
+    
     // TLS/SSL 설정
     if (broker_cfg.tls.enabled) {
         mqtt::ssl_options ssl_opts;
@@ -55,19 +65,17 @@ MqttClient::MqttClient(const BrokerConfig& broker_cfg,
         client_->connect(conn_opts_, nullptr, *this)->wait();
         std::cout << "[INFO] Connected to broker at " << uri << std::endl;
 
-        // 구독할 토픽 목록
+        // 구독할 토픽 목록 (FMS -> ROBOT)
         std::vector<std::string> topics = {
             //for_test
+            #if _FOR_TEST
             inabot_acs::TOPIC_HEARTBEAT,
             inabot_acs::TOPIC_MISSION,
             inabot_acs::TOPIC_CONTROL,
+            #endif    
             //vd5050d
             inabot_acs::TOPIC_ORDER,
             inabot_acs::TOPIC_INSTANT_ACTIONS,
-            inabot_acs::TOPIC_STATE,
-            inabot_acs::TOPIC_VISUALIZATION,
-            inabot_acs::TOPIC_CONNECTION,
-            inabot_acs::TOPIC_FACTSHEET
         };
 
         for (const auto& t : topics) {

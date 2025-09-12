@@ -12,15 +12,13 @@ MessageHandler::MessageHandler(std::shared_ptr<MissionManager> mission_mgr)
 {
     // 토픽 → 처리 함수 매핑
     handlers_ = {
+        #if _FOR_TEST
         {inabot_acs::TOPIC_MISSION,      [this](const nlohmann::json& j){ mission_manager_->handleMission(j); }},
         {inabot_acs::TOPIC_CONTROL,      [this](const nlohmann::json& j){ mission_manager_->handleControl(j); }},
         {inabot_acs::TOPIC_HEARTBEAT,    [this](const nlohmann::json& j){ mission_manager_->handleHeartbeat(j); }},
+        #endif // fms -> robot        
         {inabot_acs::TOPIC_ORDER,        [this](const nlohmann::json& j){ mission_manager_->handleOrder(j); }},           // VD5050D
         {inabot_acs::TOPIC_INSTANT_ACTIONS, [this](const nlohmann::json& j){ mission_manager_->handleInstantActions(j); }}, // VD5050D
-        {inabot_acs::TOPIC_STATE,        [this](const nlohmann::json& j){ mission_manager_->handleState(j); }},           // VD5050D
-        {inabot_acs::TOPIC_VISUALIZATION,[this](const nlohmann::json& j){ mission_manager_->handleVisualization(j); }},   // VD5050D
-        {inabot_acs::TOPIC_CONNECTION,   [this](const nlohmann::json& j){ mission_manager_->handleConnection(j); }},      // VD5050D
-        {inabot_acs::TOPIC_FACTSHEET,    [this](const nlohmann::json& j){ mission_manager_->handleFactsheet(j); }}         // VD5050D
     };
 }
 

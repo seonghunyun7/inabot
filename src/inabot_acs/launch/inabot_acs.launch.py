@@ -26,7 +26,7 @@ def generate_launch_description():
                     # LWT 설정
                     'lwt_enabled': True,
                     'lwt_topic': 'uagv/v2/Inatech/P3LDD02/connection',
-                    'lwt_payload': '{"headerId":0,"timestamp":"2025-09-11T00:00:00Z","version":"2.0.0","manufacturer":"Inatech","serialNumber":"P3LDD02","connectionState":"OFFLINE"}',
+                    'lwt_payload': '{"headerId":0,"timestamp":"2025-09-11T00:00:00Z","version":"2.0.0","manufacturer":"Inatech","serialNumber":"P3LDD02","connectionState":"CONNECTIONBROKEN"}',
                     'lwt_qos': 1,
                     'lwt_retain': True
                 }

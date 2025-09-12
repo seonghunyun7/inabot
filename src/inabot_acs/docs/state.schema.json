@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/vda5050/state.schema.json",
+  "title": "VDA5050 State",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/Header"
+    }
+  ],
+  "properties": {
+    "orderId": {
+      "$ref": "common.schema.json#/$defs/IDString"
+    },
+    "orderUpdateId": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "zoneSetId": {
+      "$ref": "common.schema.json#/$defs/IDString"
+    },
+    "lastNodeId": {
+      "$ref": "common.schema.json#/$defs/IDString"
+    },
+    "lastNodeSequenceId": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "nodeStates": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/NodeState"
+      }
+    },
+    "edgeStates": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/EdgeState"
+      }
+    },
+    "agvPosition": {
+      "$ref": "common.schema.json#/$defs/NodePosition"
+    },
+    "velocity": {
+      "$ref": "common.schema.json#/$defs/Velocity"
+    },
+    "loads": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "If omitted, AGV cannot determine load state."
+    },
+    "driving": {
+      "type": "boolean"
+    },
+    "paused": {
+      "type": "boolean"
+    },
+    "newBaseRequest": {
+      "type": "boolean"
+    },
+    "distanceSinceLastNode": {
+      "type": "number"
+    },
+    "actionStates": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/ActionState"
+      }
+    },
+    "batteryState": {
+      "$ref": "common.schema.json#/$defs/BatteryState"
+    },
+    "operatingMode": {
+      "type": "string",
+      "enum": [
+        "AUTOMATIC",
+        "SEMIAUTOMATIC",
+        "MANUAL",
+        "SERVICE",
+        "TEACHIN"
+      ]
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/Error"
+      }
+    },
+    "information": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "safetyState": {
+      "$ref": "common.schema.json#/$defs/SafetyState"
+    }
+  },
+  "required": [
+    "headerId",
+    "timestamp",
+    "version",
+    "manufacturer",
+    "serialNumber",
+    "driving",
+    "paused"
+  ],
+  "additionalProperties": true
+}

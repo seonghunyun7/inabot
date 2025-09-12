@@ -5,6 +5,8 @@
 #include "message_handler.hpp"
 #include "heartbeat_manager.hpp"
 
+#include "message_sender.hpp"
+
 // acs_node.hpp
 class AcsNode : public rclcpp::Node {
 public:
@@ -27,4 +29,6 @@ private:
     //QoS=1, Retained flag 적용으로 Master Control에서 항상 최신 상태 확인 가능
     //ROS2 SignalHandler와 통합 → 종료 시 OFFLINE 상태 발행
     std::shared_ptr<HeartbeatManager> heartbeat_manager_;
+    std::shared_ptr<MessageSender> robot_info_sender_;
+
 };

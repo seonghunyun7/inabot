@@ -54,6 +54,7 @@ add_executable(robot_acs_node
   src/mqtt_client.cpp
   src/message_handler.cpp
   src/mission_manager.cpp
+  src/message_sender.cpp
 )
 
 target_link_libraries(robot_acs_node

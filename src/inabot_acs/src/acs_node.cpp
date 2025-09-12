@@ -1,4 +1,5 @@
 #include "acs_node.hpp"
+#include "inabot_acs/topics.hpp"
 #include <iostream>
 
 AcsNode::AcsNode()
@@ -39,9 +40,19 @@ void AcsNode::init()
     // rclcpp::Node의 shared_from_this() 사용
     auto self = this->rclcpp::Node::shared_from_this();
     mission_manager_ = std::make_shared<MissionManager>(self);
+    #if 0
+    // MissionManager에서 연결 해제 신호 받을 때 동작 정의
+    mission_manager_->setDisconnectCallback([this]() {
+        std::cout << "[AcsNode] Disconnect detected. Shutting down MQTT..." << std::endl;
+        this->shutdownMqtt();
 
+        #if 0
+        rclcpp::shutdown();
+        #endif
+    });
+    #endif
     msg_handler_ = std::make_shared<MessageHandler>(mission_manager_);
- 
+
     // BrokerConfig / ClientConfig 설정
     BrokerConfig broker_cfg;
     broker_cfg.host = get_parameter("broker_host").as_string();
@@ -80,6 +91,13 @@ void AcsNode::init()
 
     heartbeat_manager_->start();
 
+    //factsheet, connection, state
+    // VD5050 robot → FMS 토픽
+    robot_info_sender_ = std::make_shared<MessageSender>(self, mqtt_client_, manufacturer, serial_number);
+    robot_info_sender_->addTopic("robot_info_sub_factsheet", inabot_acs::TOPIC_FACTSHEET);
+    robot_info_sender_->addTopic("robot_info_sub_connection", inabot_acs::TOPIC_CONNECTION);
+    robot_info_sender_->addTopic("robot_info_sub_state", inabot_acs::TOPIC_STATE);
+    
     std::cout << "[INFO] Robot ACS Node initialized." << std::endl;
 }
 

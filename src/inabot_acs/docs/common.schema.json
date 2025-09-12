@@ -1,0 +1,427 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/vda5050/common.schema.json",
+  "title": "VDA5050 Common Definitions",
+  "type": "object",
+  "$defs": {
+    "IDString": {
+      "type": "string",
+      "description": "IDs use A-Z a-z 0-9 _ - . : and must not include '/' or '$'",
+      "pattern": "^[A-Za-z0-9_.:-]+$"
+    },
+    "Header": {
+      "type": "object",
+      "properties": {
+        "headerId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/IDString"
+        },
+        "serialNumber": {
+          "$ref": "#/$defs/IDString"
+        }
+      },
+      "required": [
+        "headerId",
+        "timestamp",
+        "version",
+        "manufacturer",
+        "serialNumber"
+      ],
+      "additionalProperties": true
+    },
+    "NodePosition": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "theta": {
+          "type": "number"
+        },
+        "allowedDeviationXY": {
+          "type": "number"
+        },
+        "allowedDeviationTheta": {
+          "type": "number"
+        },
+        "mapId": {
+          "$ref": "#/$defs/IDString"
+        },
+        "mapDescription": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "theta",
+        "mapId"
+      ],
+      "additionalProperties": true
+    },
+    "ActionParameter": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {}
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "Action": {
+      "type": "object",
+      "properties": {
+        "actionType": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]+$"
+        },
+        "actionId": {
+          "$ref": "#/$defs/IDString"
+        },
+        "actionDescription": {
+          "type": "string"
+        },
+        "blockingType": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "SOFT",
+            "HARD"
+          ]
+        },
+        "actionParameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ActionParameter"
+          }
+        }
+      },
+      "required": [
+        "actionType",
+        "actionId",
+        "blockingType"
+      ],
+      "additionalProperties": true
+    },
+    "ControlPoint": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "weight": {
+          "type": "number",
+          "default": 1.0
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "additionalProperties": false
+    },
+    "Trajectory": {
+      "type": "object",
+      "properties": {
+        "degree": {
+          "type": "number",
+          "minimum": 1
+        },
+        "knotVector": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          }
+        },
+        "controlPoints": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/ControlPoint"
+          }
+        }
+      },
+      "required": [
+        "controlPoints"
+      ],
+      "additionalProperties": true
+    },
+    "Node": {
+      "type": "object",
+      "properties": {
+        "nodeId": {
+          "$ref": "#/$defs/IDString"
+        },
+        "sequenceId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nodeDescription": {
+          "type": "string"
+        },
+        "released": {
+          "type": "boolean"
+        },
+        "nodePosition": {
+          "$ref": "#/$defs/NodePosition"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Action"
+          }
+        }
+      },
+      "required": [
+        "nodeId",
+        "sequenceId",
+        "released"
+      ],
+      "additionalProperties": true
+    },
+    "Edge": {
+      "type": "object",
+      "properties": {
+        "edgeId": {
+          "$ref": "#/$defs/IDString"
+        },
+        "sequenceId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "edgeDescription": {
+          "type": "string"
+        },
+        "released": {
+          "type": "boolean"
+        },
+        "startNodeId": {
+          "$ref": "#/$defs/IDString"
+        },
+        "endNodeId": {
+          "$ref": "#/$defs/IDString"
+        },
+        "maxSpeed": {
+          "type": "number"
+        },
+        "maxHeight": {
+          "type": "number"
+        },
+        "minHeight": {
+          "type": "number"
+        },
+        "orientation": {
+          "type": "number"
+        },
+        "orientationType": {
+          "type": "string",
+          "enum": [
+            "GLOBAL",
+            "TANGENTIAL"
+          ]
+        },
+        "direction": {
+          "type": "string"
+        },
+        "rotationAllowed": {
+          "type": "boolean"
+        },
+        "maxRotationSpeed": {
+          "type": "number"
+        },
+        "trajectory": {
+          "$ref": "#/$defs/Trajectory"
+        },
+        "length": {
+          "type": "number"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Action"
+          }
+        }
+      },
+      "required": [
+        "edgeId",
+        "sequenceId",
+        "released",
+        "startNodeId",
+        "endNodeId"
+      ],
+      "additionalProperties": true
+    },
+    "NodeState": {
+      "type": "object",
+      "properties": {
+        "nodeId": {
+          "$ref": "#/$defs/IDString"
+        },
+        "sequenceId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nodeDescription": {
+          "type": "string"
+        },
+        "released": {
+          "type": "boolean"
+        },
+        "nodePosition": {
+          "$ref": "#/$defs/NodePosition"
+        }
+      },
+      "required": [
+        "nodeId",
+        "sequenceId",
+        "released"
+      ],
+      "additionalProperties": true
+    },
+    "EdgeState": {
+      "type": "object",
+      "properties": {
+        "edgeId": {
+          "$ref": "#/$defs/IDString"
+        },
+        "sequenceId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "edgeDescription": {
+          "type": "string"
+        },
+        "released": {
+          "type": "boolean"
+        },
+        "trajectory": {
+          "$ref": "#/$defs/Trajectory"
+        }
+      },
+      "required": [
+        "edgeId",
+        "sequenceId",
+        "released"
+      ],
+      "additionalProperties": true
+    },
+    "Velocity": {
+      "type": "object",
+      "properties": {
+        "vx": {
+          "type": "number"
+        },
+        "vy": {
+          "type": "number"
+        },
+        "omega": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "vx",
+        "vy",
+        "omega"
+      ],
+      "additionalProperties": false
+    },
+    "ActionState": {
+      "type": "object",
+      "properties": {
+        "actionId": {
+          "$ref": "#/$defs/IDString"
+        },
+        "actionType": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]+$"
+        },
+        "actionStatus": {
+          "type": "string",
+          "enum": [
+            "INITIALIZING",
+            "RUNNING",
+            "PAUSED",
+            "FINISHED",
+            "FAILED"
+          ]
+        },
+        "resultDescription": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "actionId",
+        "actionType",
+        "actionStatus"
+      ],
+      "additionalProperties": true
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "errorLevel": {
+          "type": "string",
+          "enum": [
+            "WARNING",
+            "FATAL"
+          ]
+        },
+        "errorDescription": {
+          "type": "string"
+        },
+        "errorReferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "errorLevel",
+        "errorDescription"
+      ],
+      "additionalProperties": true
+    },
+    "BatteryState": {
+      "type": "object",
+      "properties": {
+        "charging": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "charging"
+      ],
+      "additionalProperties": true
+    },
+    "SafetyState": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": true
+    }
+  }
+}

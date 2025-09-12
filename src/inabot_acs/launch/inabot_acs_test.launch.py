@@ -15,7 +15,7 @@ def generate_launch_description():
                     'broker_port': 1883,
                     'client_id': 'fms_client',
                     'clean_session': False,           # LWT 테스트용
-                    'keep_alive_interval': 10,       # MQTT keepalive (초)
+                    'keep_alive_interval': 15,       # MQTT keepalive (초)
                     'max_inflight': 65535,
                     'tls_enabled': False,
                     

@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/vda5050/connection.schema.json",
+  "title": "VDA5050 Connection",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/Header"
+    }
+  ],
+  "properties": {
+    "connection": {
+      "type": "string",
+      "enum": [
+        "ONLINE",
+        "OFFLINE"
+      ]
+    }
+  },
+  "required": [
+    "headerId",
+    "timestamp",
+    "version",
+    "manufacturer",
+    "serialNumber",
+    "connection"
+  ],
+  "additionalProperties": true,
+  "description": "QoS1 recommended at MQTT level; structure kept minimal."
+}
