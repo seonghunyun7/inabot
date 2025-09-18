@@ -1,4 +1,6 @@
 #include "inabot_acs/topics.hpp"
+#include "error_codes.hpp"
+#include "state_data.hpp"
 #include "message_sender.hpp"
 #include <nlohmann/json.hpp>
 #include <iostream>
@@ -39,14 +41,33 @@ MessageSender::MessageSender(std::shared_ptr<rclcpp::Node> node,
 
 void MessageSender::addTopic(const std::string& ros_topic, const std::string& mqtt_topic)
 {
-    auto sub = node_->create_subscription<std_msgs::msg::String>(
-        ros_topic, 10,
-        [this, mqtt_topic](const std_msgs::msg::String::SharedPtr msg){
-            rosCallback(mqtt_topic, msg);
-        }
-    );
+    if (mqtt_topic == inabot_acs::TOPIC_STATE) {
+        auto sub = node_->create_subscription<std_msgs::msg::String>(
+            ros_topic, 10,
+            [this](const std_msgs::msg::String::SharedPtr msg){
+                last_state_ = msg->data;  // 최신 state 저장
+                std::cout << "[MessageSender] Updated STATE from ROS: " << last_state_ << std::endl;
+            }
+        );
+        subscriptions_.push_back({sub, mqtt_topic});
 
-    subscriptions_.push_back({sub, mqtt_topic});
+        // state 전용 주기 타이머 시작 (예: 500ms)
+        state_timer_ = node_->create_wall_timer(
+            std::chrono::milliseconds(500),
+            [this]() { publishState(); }
+        );
+    }
+    else {
+        // 다른 토픽은 기존 로직 그대로
+        auto sub = node_->create_subscription<std_msgs::msg::String>(
+            ros_topic, 10,
+            [this, mqtt_topic](const std_msgs::msg::String::SharedPtr msg){
+                rosCallback(mqtt_topic, msg);
+            }
+        );
+        subscriptions_.push_back({sub, mqtt_topic});
+    }
+
     std::cout << "[MessageSender] Subscribed ROS topic: " << ros_topic
               << " → MQTT topic: " << mqtt_topic << std::endl;
 }
@@ -134,137 +155,8 @@ void MessageSender::rosCallback(const std::string& mqtt_topic,
         payload = j.dump();
 
     } else if (mqtt_topic == inabot_acs::TOPIC_STATE) {
-        // state 토픽: VDA5050 state JSON 생성
-        //AGV 위치, 속도, 적재물 등
-        json j;
-        j["headerId"] = header_counter_[mqtt_topic]++;
-        j["timestamp"] = getCurrentUtcTimeString();
-        j["version"] = "2.0.0";
-        j["manufacturer"] = manufacturer_;
-        j["serialNumber"] = serial_number_;
-
-        std::string state = msg->data.empty() ? "NONE" : msg->data;
-
-        // 기본 필드
-        j["newBaseRequest"] = false;
-        j["distanceSinceLastNode"] = 0;
-        j["operatingMode"] = (state == "IDLE") ? "MANUAL" : "AUTOMATIC";
-        j["QR"] = "";
-
-        // 상태별 driving, paused, actionStates, batteryState 등
-        if (state == "MOVING") {
-            j["driving"] = true;
-            j["paused"] = false;
-            j["actionStates"] = json::array(); // 이동 중 특별 액션 없음
-
-            j["agvPosition"] = {
-                {"positionInitialized", true},
-                {"localizationScore", 1},
-                {"deviationRange", 0},
-                {"x", 297.713073730469},
-                {"y", 6.97085332870483},
-                {"theta", -3.13170170783997},
-                {"mapId", ""},
-                {"mapDescription", ""}
-            };
-
-            j["velocity"] = { {"vx", -0.0}, {"vy", -0.0}, {"omega", 0.0} };
-
-            j["batteryState"] = {
-                {"batteryCharge", 35.7},
-                {"batteryVoltage", 50.8},
-                {"charging", false}
-            };
-
-        } else if (state == "IDLE") {
-            j["driving"] = false;
-            j["paused"] = false;
-            j["actionStates"] = json::array();
-
-            j["agvPosition"] = {
-                {"positionInitialized", true},
-                {"localizationScore", 1},
-                {"deviationRange", 0},
-                {"x", 265.194396972656},
-                {"y", 2.88258290290833},
-                {"theta", -0.0076024578884244},
-                {"mapId", ""},
-                {"mapDescription", ""}
-            };
-
-            j["velocity"] = { {"vx", 0.489341884851456}, {"vy", -0.848814129829407}, {"omega", 0.0} };
-
-            j["batteryState"] = {
-                {"batteryCharge", 65.6},
-                {"batteryVoltage", 52.3},
-                {"charging", false}
-            };
-
-        } else if (state == "CHARGING") {
-            j["driving"] = false;
-            j["paused"] = false;
-            j["actionStates"] = {
-                {{"actionId", "stopCharging"},
-                {"actionType", "stopCharging"},
-                {"actionStatus", "FINISHED"}}
-            };
-
-            j["agvPosition"] = {
-                {"positionInitialized", true},
-                {"localizationScore", 1},
-                {"deviationRange", 0},
-                {"x", 221.289108276367},
-                {"y", -44.3882446289062},
-                {"theta", -3.13039755821228},
-                {"mapId", ""},
-                {"mapDescription", ""}
-            };
-
-            j["velocity"] = { {"vx", 0.0}, {"vy", 0.0}, {"omega", 0.0} };
-
-            j["batteryState"] = {
-                {"batteryCharge", 66.0},
-                {"batteryVoltage", 53.7},
-                {"charging", true}
-            };
-
-        } else if (state == "LOADING") {
-            j["driving"] = true;
-            j["paused"] = false;
-            j["actionStates"] = {
-                {{"actionId", "detect"}, {"actionType", "detectObject"}, {"actionStatus", "RUNNING"}},
-                {{"actionId", "pick"}, {"actionType", "pick"}, {"actionStatus", "WAITING"}}
-            };
-
-            j["agvPosition"] = {
-                {"positionInitialized", true},
-                {"localizationScore", 1},
-                {"deviationRange", 0},
-                {"x", 298.326721191406},
-                {"y", 5.38703918457031},
-                {"theta", -3.12417340278625},
-                {"mapId", ""},
-                {"mapDescription", ""}
-            };
-
-            j["velocity"] = { {"vx", -0.00089868635404855}, {"vy", 0.0021780279930681}, {"omega", 0.0} };
-
-            j["batteryState"] = {
-                {"batteryCharge", 35.6},
-                {"batteryVoltage", 50.8},
-                {"charging", false}
-            };
-        }
-
-        // 공통 필드
-        j["nodeStates"] = json::array();
-        j["edgeStates"] = json::array();
-        j["LoadFactor"] = { {"Front_Traction", 0}, {"Front_Steer", 0}, {"Rear_Traction", 0}, {"Rear_Steer", 0} };
-        j["errors"] = json::array();
-        j["information"] = json::array();
-        j["safetyState"] = { {"eStop", "AUTOACK"}, {"fieldViolation", false} };
-
-        payload = j.dump();
+        // state는 addTopic에서 처리 → 여기선 안보냄
+        return;
     } else {
         payload = msg->data;
     }
@@ -274,3 +166,93 @@ void MessageSender::rosCallback(const std::string& mqtt_topic,
               << " -> " << payload << std::endl;
 }
 
+void MessageSender::publishState()
+{
+    // 구조체 초기화
+    StateData stateData;
+
+    stateData.state = last_state_.empty() ? "NONE" : last_state_;
+    stateData.newBaseRequest = false;
+    stateData.distanceSinceLastNode = 0.0;
+    stateData.operatingMode = (stateData.state == "IDLE") ? "MANUAL" : "AUTOMATIC";
+    stateData.QR = "";
+
+    // 상태별 데이터 채우기
+    if (stateData.state == "MOVING") {
+        stateData.driving = true;
+        stateData.paused = false;
+        stateData.actionStates.clear();
+
+        stateData.agvPosition = {true, 1.0, 0.0, 297.71, 6.97, -3.13, "", ""};
+        stateData.velocity = {0.2, 0.0, 0.0};
+        stateData.batteryState = {35.7, 50.8, false};
+    } else if (stateData.state == "IDLE") {
+        stateData.driving = false;
+        stateData.paused = false;
+        stateData.actionStates.clear();
+
+        stateData.agvPosition = {true, 1.0, 0.0, 265.19, 2.88, -0.0076, "", ""};
+        stateData.velocity = {0.0, 0.0, 0.0};
+        stateData.batteryState = {65.6, 52.3, false};
+    } else if (stateData.state == "CHARGING") {
+        stateData.driving = false;
+        stateData.paused = false;
+        stateData.actionStates = { {"stopCharging", "stopCharging", "FINISHED"} };
+
+        stateData.agvPosition = {true, 1.0, 0.0, 221.28, -44.38, -3.13, "", ""};
+        stateData.velocity = {0.0, 0.0, 0.0};
+        stateData.batteryState = {66.0, 53.7, true};
+    } else if (stateData.state == "LOADING") {
+        stateData.driving = true;
+        stateData.paused = false;
+        stateData.actionStates = {
+            {"detect", "detectObject", "RUNNING"},
+            {"pick", "pick", "WAITING"}
+        };
+
+        stateData.agvPosition = {true, 1.0, 0.0, 298.32, 5.38, -3.12, "", ""};
+        stateData.velocity = {0.0, 0.0, 0.0};
+        stateData.batteryState = {35.6, 50.8, false};
+    } else {
+        stateData.driving = false;
+        stateData.paused = false;
+        stateData.actionStates.clear();
+        stateData.agvPosition.positionInitialized = false;
+        stateData.velocity = {0.0, 0.0, 0.0};
+        stateData.batteryState = {0.0, 0.0, false};
+    }
+
+    // 공통 필드 (예: node/edge, load, error 등)
+    stateData.nodeStates.clear();
+    stateData.edgeStates.clear();
+    stateData.loadFactor = {0, 0, 0, 0};
+
+    // -----------------------
+    // 에러 코드 처리
+    // -----------------------
+    // 현재 발생한 에러 코드 목록 (실제 로직에서 결정)
+    std::vector<std::string> activeErrorCodes = {"001", "1504"};  // 예시
+
+    // 현재 UTC 시간
+    std::string ts = getCurrentUtcTimeString();
+
+    // ERROR_CODES → StateData::errors 변환
+    populateErrors(stateData, activeErrorCodes, ts);
+
+    stateData.information = { {"I001", "Routine check OK", ts} };
+    stateData.safetyState = {"AUTOACK", false};
+
+    // headerId 추가
+    nlohmann::json j = stateData.toJson();
+    j["headerId"] = header_counter_[inabot_acs::TOPIC_STATE]++;
+    j["timestamp"] = ts;
+    j["version"] = "2.0.0";
+    j["manufacturer"] = manufacturer_;
+    j["serialNumber"] = serial_number_;
+
+    // MQTT 전송
+    std::string payload = j.dump();
+    mqtt_client_->publish(inabot_acs::TOPIC_STATE, payload);
+
+    std::cout << "[MessageSender] Periodic STATE publish → " << payload << std::endl;
+}

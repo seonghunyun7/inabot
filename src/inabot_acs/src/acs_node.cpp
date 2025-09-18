@@ -75,7 +75,7 @@ void AcsNode::init()
     // MQTT Client 생성
     mqtt_client_ = std::make_shared<MqttClient>(broker_cfg, client_cfg, msg_handler_);
 
-   // Heartbeat Manager 생성
+    // Heartbeat Manager 생성
     int heartbeat_interval = get_parameter("heartbeat_interval").as_int();  // Heartbeat 주기
     std::string manufacturer = get_parameter("manufacturer").as_string();
     std::string serial_number = get_parameter("serial_number").as_string();

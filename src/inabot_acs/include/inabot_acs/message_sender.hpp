@@ -32,6 +32,7 @@ private:
     void rosCallback(const std::string& mqtt_topic,
                      const std_msgs::msg::String::SharedPtr msg);
 
+    void publishState(); // state 주기 publish 전용
     struct SubInfo {
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub;
         std::string mqtt_topic;
@@ -46,4 +47,7 @@ private:
 
     // 각 MQTT 토픽별 headerId 카운터
     std::unordered_map<std::string, uint32_t> header_counter_;
+
+    std::string last_state_;  // 최신 state 값 저장
+    rclcpp::TimerBase::SharedPtr state_timer_;
 };
