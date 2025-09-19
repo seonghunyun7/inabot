@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>inabot</name>
+  <version>0.0.1</version>
+  <description>
+    ROS 2 Meta package for Inabot robot
+  </description>
+  <maintainer email="you@example.com">Your Name</maintainer>
+  <license>Apache 2.0</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- inabot 관련 주요 패키지들 -->
+  <exec_depend>inabot_core</exec_depend>
+  <exec_depend>inabot_msgs</exec_depend>
+  <exec_depend>inabot_description</exec_depend>
+  <exec_depend>inabot_slam</exec_depend>
+  <exec_depend>inabot_acs</exec_depend>
+  <exec_depend>inabot_teleop</exec_depend>
+  <exec_depend>inabot_joy</exec_depend>
+
+  <!-- 필요시 외부 드라이버도 포함 -->
+  <!-- <exec_depend>orbbec_camera</exec_depend> -->
+  <!-- <exec_depend>orbbec_camera_msgs</exec_depend> -->
+  <!-- <exec_depend>orbbec_description</exec_depend> -->
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
