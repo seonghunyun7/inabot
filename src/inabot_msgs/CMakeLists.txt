@@ -23,6 +23,8 @@ find_package(nav2_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+	"msg/PLCControl.msg"
+	"msg/PLCStatus.msg"
 	"msg/ObstacleStatus.msg"
 	"msg/BmsState.msg"
 	"msg/BmsCanFrame.msg"

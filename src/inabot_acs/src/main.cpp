@@ -35,9 +35,15 @@ void signalhandler(int sig)
 
     switch (sig) {
         case SIGINT:
-        case SIGTERM:
+        //case SIGTERM:
         case SIGTSTP:
             std::cout << "Received termination signal (" << sig << "), shutting down cleanly..." << std::endl;
+            rclcpp::shutdown();
+            break;
+
+        //SIGTERM을 명시적으로 구분 → power off나 시스템 종료 감지.
+        case SIGTERM:
+            std::cout << "Received SIGTERM (system shutdown / power off), performing cleanup..." << std::endl;
             rclcpp::shutdown();
             break;
 

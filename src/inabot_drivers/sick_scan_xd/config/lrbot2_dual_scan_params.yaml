@@ -1,0 +1,48 @@
+sick_tim_571_front:
+  ros__parameters:
+    hostname: "10.0.0.30"
+    port: "2112"
+    scanner_type: "sick_tim_5xx"
+    frame_id: "base_scan_front"
+    use_generation_timestamp: true
+    min_ang: -2.0944
+    max_ang: 2.0944
+    range_min: 0.05
+    range_max: 25.0
+    angle_increment: 0.00581776 # 각도 간격 조정
+    time_increment: 0.0000617  # 기대값으로 설정 (0.33도 /810포인트)
+    #angle_increment: 0.00436      # 각도 간격 조정
+    #time_increment: 0.000185185   # 기대값으로 설정 (0.35도 /440포인트)
+    scan_time: 0.0667              # 스캔 주기와 일치
+    ros_qos: 4  # -1 : rclcpp::SystemDefaultsQoS() 0: rclcpp::SystemDefaultsQoS(), 1: rclcpp::ParameterEventsQoS(), 2: rclcpp::ServicesQoS(), 3: rclcpp::ParametersQoS(), 4: rclcpp::SensorDataQoS()
+    tf_base_frame_id: "base_scan"  # Change here
+    tf_base_lidar_xyz_rpy: "0.373455,0.27346,0.106,0,0,0.767945"
+    tf_publish_rate: 15.0
+    imu_enable: false      # IMU 토픽 비활성화
+    encoder_mode: -1  # Encoder 토픽 비활성화
+    use_binary_protocol: false
+    cloud_output_mode: 0
+sick_tim_571_rear:
+  ros__parameters:
+    hostname: "10.0.0.31"
+    port: "2112"
+    scanner_type: "sick_tim_5xx"
+    frame_id: "base_scan_rear"
+    use_generation_timestamp: true
+    min_ang: -2.0944
+    max_ang: 2.0944
+    range_min: 0.05
+    range_max: 25.0
+    angle_increment: 0.00581776 # 각도 간격 조정
+    time_increment: 0.0000617  # 기대값으로 설정 (0.33도 /810포인트)
+    #angle_increment: 0.00436      # 각도 간격 조정
+    #time_increment: 0.000185185   # 기대값으로 설정 (0.35도 /440포인트)
+    scan_time: 0.0667              # 스캔 주기와 일치 
+    ros_qos: 4  # -1 : rclcpp::SystemDefaultsQoS() 0: rclcpp::SystemDefaultsQoS(), 1: rclcpp::ParameterEventsQoS(), 2: rclcpp::ServicesQoS(), 3: rclcpp::ParametersQoS(), 4: rclcpp::SensorDataQoS()
+    tf_base_frame_id: "base_scan"  # Change here
+    tf_base_lidar_xyz_rpy: "-0.373455,-0.27346,0.106,0,0,-2.3911"
+    tf_publish_rate: 15.0
+    imu_enable: false      # IMU 토픽 비활성화
+    encoder_mode: -1  # Encoder 토픽 비활성화
+    use_binary_protocol: false
+    cloud_output_mode: 0
