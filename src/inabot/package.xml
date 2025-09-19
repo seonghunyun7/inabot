@@ -18,6 +18,9 @@
   <exec_depend>inabot_acs</exec_depend>
   <exec_depend>inabot_teleop</exec_depend>
   <exec_depend>inabot_joy</exec_depend>
+  <exec_depend>sick_safety_controller</exec_depend>
+  <exec_depend>cognex_is8905</exec_depend>
+  <exec_depend>sound_driver</exec_depend>
 
   <!-- 필요시 외부 드라이버도 포함 -->
   <!-- <exec_depend>orbbec_camera</exec_depend> -->

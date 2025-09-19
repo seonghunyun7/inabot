@@ -1,0 +1,7 @@
+repositories:
+
+  # Everything that rosdep will not install
+  sick_visionary_base:
+    type: git
+    url: git@ids-git.fzi.de:project-groups/sick_safevisionary/sick_safevisionary_base.git
+    version: main

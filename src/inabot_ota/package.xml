@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>inabot_ota</name>
+  <version>0.1.0</version>
+  <description>Safe OTA node for inabot robot with backup, rollback, and automatic environment setup.</description>
+
+  <maintainer email="ysh@example.com">YSH</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
